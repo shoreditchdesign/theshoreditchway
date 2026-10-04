@@ -1,0 +1,343 @@
+:root{
+  --coral:#FD6653;
+  --ink:#0E1013;
+  --paper:#FFFFFF;
+  --off:#FAFAFA;
+  --rule-dark:rgba(14,16,19,.28);
+  --rule-light:rgba(250,250,250,.28);
+  --muted-dark:rgba(14,16,19,.62);
+  --muted-light:rgba(250,250,250,.62);
+  --display:'Cabinet Grotesk','Inter',sans-serif;
+  --body:'Inter',sans-serif;
+
+  /* spacing scale — universal rule, see design-notes.md §3. Don't use raw px outside this scale. */
+  --space-1:8px;
+  --space-2:16px;
+  --space-3:24px;
+  --space-4:32px;
+  --space-5:48px;
+  --space-6:64px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{height:100%}
+
+body{
+  background:#8A8A8A;
+  font-family:var(--body);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  overflow:hidden;
+}
+
+.slide{
+  width:1440px;
+  height:800px;
+  position:relative;
+  overflow:hidden;
+  padding:64px 80px;
+  display:none;
+  flex-direction:column;
+  flex:none;
+}
+.slide.active{display:flex}
+
+.slide--light{background:var(--paper);color:var(--ink)}
+.slide--dark{background:var(--ink);color:var(--off)}
+.slide--coral{background:var(--coral);color:var(--ink)}
+
+/* ---------- logo ---------- */
+.logo{
+  position:absolute;
+  top:40px;
+  right:80px;
+  width:101px;
+  height:33px;
+  color:inherit;
+}
+.logo svg{width:100%;height:100%;display:block}
+.logo svg path{fill:currentColor;stroke:currentColor}
+
+/* ---------- type ---------- */
+h1{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:88px;
+  line-height:1.0;
+  letter-spacing:-.02em;
+}
+
+h2{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:52px;
+  line-height:1.05;
+  letter-spacing:-.015em;
+}
+
+.rule{
+  height:1px;
+  background:var(--rule-dark);
+  margin-top:24px;
+}
+.slide--dark .rule{background:var(--rule-light)}
+
+.deck-sub{
+  font-family:var(--body);
+  font-size:18px;
+  font-weight:400;
+  line-height:1.5;
+  color:var(--muted-light);
+  max-width:640px;
+  margin-top:28px;
+}
+
+.lede{
+  font-family:var(--body);
+  font-size:19px;
+  line-height:1.55;
+  max-width:900px;
+  margin-top:32px;
+  color:var(--muted-dark);
+}
+.slide--dark .lede{color:var(--muted-light)}
+
+.body-title{
+  font-family:var(--body);
+  font-weight:700;
+  font-size:17px;
+  line-height:1.35;
+  letter-spacing:-.005em;
+}
+
+.body-text{
+  font-family:var(--body);
+  font-weight:400;
+  font-size:16px;
+  line-height:1.6;
+  color:var(--muted-dark);
+}
+.slide--dark .body-text{color:var(--muted-light)}
+
+.eyebrow{
+  font-family:var(--body);
+  font-weight:700;
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted-dark);
+}
+.slide--dark .eyebrow{color:var(--muted-light)}
+
+.content{margin-top:56px;flex:1}
+
+/* ---------- stacked list ---------- */
+.stack{display:flex;flex-direction:column;gap:26px;max-width:1100px}
+.stack .item{display:grid;grid-template-columns:34px 1fr;gap:20px;align-items:start}
+.stack .num{
+  font-family:var(--body);
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.06em;
+  color:var(--coral);
+  padding-top:3px;
+}
+.slide--dark .stack .num{color:var(--coral)}
+.stack .body-text{margin-top:5px;max-width:940px}
+
+/* ---------- two column compare ---------- */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:64px;height:100%}
+.col{display:flex;flex-direction:column}
+.col-head{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:30px;
+  letter-spacing:-.01em;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--rule-dark);
+}
+.slide--dark .col-head{border-bottom-color:var(--rule-light)}
+
+.group{margin-top:26px}
+.group .eyebrow{margin-bottom:14px;display:block}
+
+ul.marks{list-style:none;display:flex;flex-direction:column;gap:12px}
+ul.marks li{
+  display:grid;
+  grid-template-columns:22px 1fr;
+  gap:10px;
+  font-size:15.5px;
+  line-height:1.5;
+  color:var(--muted-dark);
+}
+.slide--dark ul.marks li{color:var(--muted-light)}
+ul.marks li .m{font-weight:700;color:var(--ink)}
+.slide--dark ul.marks li .m{color:var(--off)}
+ul.marks.neg li .m{color:var(--coral)}
+
+/* ---------- targets grid ---------- */
+.targets{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 40px;max-width:1180px}
+.targets--4{grid-template-columns:repeat(4,1fr)}
+.target{
+  border-top:1px solid var(--rule-dark);
+  padding-top:16px;
+}
+.slide--dark .target{border-top-color:var(--rule-light)}
+.target .body-title{margin-bottom:7px}
+.target .body-text{font-size:14.5px;line-height:1.5}
+
+.measures{
+  margin-top:44px;
+  padding-top:26px;
+  border-top:1px solid var(--rule-dark);
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:32px;
+  max-width:1180px;
+}
+.slide--dark .measures{border-top-color:var(--rule-light)}
+.measures .body-title{font-size:15px;margin-bottom:6px}
+.measures .body-text{font-size:14px;line-height:1.45}
+
+/* ---------- profile — photo/bio left, media grid right ---------- */
+.profile{display:grid;grid-template-columns:360px 1fr;gap:64px;height:100%}
+.profile-avatar{
+  width:96px;height:96px;
+  border-radius:50%;
+  overflow:hidden;
+  background:var(--rule-dark);
+  margin-bottom:28px;
+}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-name{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:34px;
+  line-height:1.08;
+  letter-spacing:-.015em;
+}
+.profile-role{font-size:15px;color:var(--muted-dark);margin-top:8px}
+.slide--dark .profile-role{color:var(--muted-light)}
+.profile-section{margin-top:32px}
+.profile-section .eyebrow{margin-bottom:10px;display:block}
+.profile-section .body-text{max-width:320px}
+.profile-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.profile-list li .body-title{font-size:15px}
+.profile-list li .body-text{font-size:13.5px;margin-top:2px}
+.profile-media{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-auto-rows:1fr;
+  gap:2px;
+  height:100%;
+  overflow:hidden;
+}
+.profile-media .cell{
+  background:var(--rule-dark) center/cover no-repeat;
+  min-height:0;
+}
+.profile-media .cell img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ---------- quote — single large statement, use for testimonial/verbatim ---------- */
+.quote{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  height:100%;
+  max-width:1100px;
+}
+.quote blockquote{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:44px;
+  line-height:1.2;
+  letter-spacing:-.01em;
+}
+.quote cite{
+  display:block;
+  font-style:normal;
+  font-family:var(--body);
+  font-size:15px;
+  color:var(--muted-dark);
+  margin-top:28px;
+}
+.slide--dark .quote cite{color:var(--muted-light)}
+
+/* ---------- metrics — big-number row, use for headline results ---------- */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;height:100%;align-content:center}
+.metric .value{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:64px;
+  letter-spacing:-.02em;
+  color:var(--coral);
+}
+.metric .label{font-size:14px;color:var(--muted-dark);margin-top:10px;max-width:220px}
+.slide--dark .metric .label{color:var(--muted-light)}
+
+/* Card variant: a ruled cell with a coral index, a title and a line of text under it.
+   Three across for goals or pillars, four across for measures. */
+.metrics--3{grid-template-columns:repeat(3,1fr)}
+.metrics--cards{align-content:start;height:auto}
+.metrics--cards .metric{border-top:1px solid var(--rule-dark);padding-top:var(--space-3)}
+.slide--dark .metrics--cards .metric{border-top-color:var(--rule-light)}
+.metrics--cards .body-title{margin-top:var(--space-2)}
+.metrics--cards .body-text{margin-top:var(--space-1);font-size:15.5px;line-height:1.55;max-width:360px}
+
+/* ---------- rows — ruled three-column rows: index, title, text ----------
+   Each row sits under a full-width rule, its coral index, title and text set on
+   the slide's thirds. Use for a short numbered set (three to four) whose items
+   carry a sentence or two each: instructions, principles, ground rules. */
+.rows{display:flex;flex-direction:column}
+.rows .row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  align-items:start;
+  padding-block:var(--space-4);
+  border-top:1px solid var(--rule-dark);
+}
+.slide--dark .rows .row{border-top-color:var(--rule-light)}
+.rows .num{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:30px;
+  line-height:1;
+  letter-spacing:-.01em;
+  color:var(--coral);
+}
+.rows .body-title{padding-top:var(--space-1)}
+.rows .body-text{padding-top:6px;max-width:420px}
+
+.pending{
+  display:inline-block;
+  font-family:var(--body);
+  font-weight:700;
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--coral);
+  border:1px solid var(--coral);
+  padding:6px 12px;
+  margin-top:26px;
+}
+
+.footnote{
+  font-size:14px;
+  line-height:1.5;
+  color:var(--muted-dark);
+  max-width:900px;
+  margin-top:auto;
+  padding-top:28px;
+}
+.slide--dark .footnote{color:var(--muted-light)}
+
+/* Navigation chrome (bottom bar, index panel, hover thumbnails) is injected at
+   runtime by deck.js, not authored here — see design-notes.md §2. This file only
+   owns the .slide.active contract deck.js relies on, and print output. */
+@media print{
+  body{background:none;display:block}
+  .slide{display:flex !important;page-break-after:always}
+}

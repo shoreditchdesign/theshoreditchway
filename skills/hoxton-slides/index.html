@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Hoxton Slides — Layout Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+
+<!-- Layout library: one slide per layout, each tagged data-layout="<name>".
+     To build a deck, copy the <section> blocks you need into a new file with the
+     same <head> and scripts. To add a layout, add its CSS to deck.css, a <section>
+     here, and a row to the layout table in SKILL.md. See design-notes.md. -->
+
+<!-- ============ 1. COVER — dark, h1 + deck-sub ============ -->
+<section data-layout="cover" class="slide slide--dark" data-section="Cover">
+  <div class="logo" data-logo></div>
+  <div style="margin-top:auto">
+    <h1>Deck title here</h1>
+    <p class="deck-sub">One or two sentences on what this document is and who it's for.</p>
+    <p class="deck-sub" style="margin-top:40px;font-size:14px">Month Year</p>
+  </div>
+</section>
+
+<!-- ============ 2. STACK — numbered list, use for sequential points ============ -->
+<section data-layout="stack" class="slide slide--light" data-section="Overview">
+  <div class="logo" data-logo></div>
+  <h2>Section heading</h2>
+  <div class="rule"></div>
+  <p class="lede">Optional one-line framing sentence for the slide. Omit if the heading is self-explanatory.</p>
+  <div class="content" style="margin-top:36px">
+    <div class="stack">
+      <div class="item">
+        <div class="num">01</div>
+        <div>
+          <div class="body-title">Point title, one line</div>
+          <div class="body-text">Supporting sentence or two. Declarative register, no filler, no passive constructions.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="num">02</div>
+        <div>
+          <div class="body-title">Point title, one line</div>
+          <div class="body-text">Supporting sentence or two.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="num">03</div>
+        <div>
+          <div class="body-title">Point title, one line</div>
+          <div class="body-text">Supporting sentence or two.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. COMPARE — two column, use for A vs B ============ -->
+<section data-layout="compare" class="slide slide--light" data-section="Comparison">
+  <div class="logo" data-logo></div>
+  <h2>Comparison heading</h2>
+  <div class="rule"></div>
+  <div class="content">
+    <div class="compare">
+      <div class="col">
+        <div class="col-head">Option A</div>
+        <div class="group">
+          <span class="eyebrow">In favour</span>
+          <ul class="marks">
+            <li><span class="m">+</span><span>Point in favour.</span></li>
+            <li><span class="m">+</span><span>Point in favour.</span></li>
+          </ul>
+        </div>
+        <div class="group">
+          <span class="eyebrow">Against</span>
+          <ul class="marks neg">
+            <li><span class="m">&mdash;</span><span>Point against.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="col-head">Option B</div>
+        <div class="group">
+          <span class="eyebrow">In favour</span>
+          <ul class="marks">
+            <li><span class="m">+</span><span>Point in favour.</span></li>
+          </ul>
+        </div>
+        <div class="group">
+          <span class="eyebrow">Against</span>
+          <ul class="marks neg">
+            <li><span class="m">&mdash;</span><span>Point against.</span></li>
+            <li><span class="m">&mdash;</span><span>Point against.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="footnote">Optional bottom-anchored qualifier that applies to the whole slide.</p>
+</section>
+
+<!-- ============ 4. TARGETS + MEASURES — grid, use for evidence/benchmarking rows ============ -->
+<section data-layout="targets" class="slide slide--light" data-section="Evidence">
+  <div class="logo" data-logo></div>
+  <h2>Evidence heading</h2>
+  <div class="rule"></div>
+  <p class="lede">One line on how the set was selected and why it's a fair comparison.</p>
+  <div class="content" style="margin-top:36px">
+    <div class="targets">
+      <div class="target">
+        <div class="body-title">Item one</div>
+        <div class="body-text">One or two sentences of finding.</div>
+      </div>
+      <div class="target">
+        <div class="body-title">Item two</div>
+        <div class="body-text">One or two sentences of finding.</div>
+      </div>
+      <div class="target">
+        <div class="body-title">Item three</div>
+        <div class="body-text">One or two sentences of finding.</div>
+      </div>
+    </div>
+    <div class="measures">
+      <div>
+        <div class="body-title">Measure one</div>
+        <div class="body-text">What this column tracks.</div>
+      </div>
+      <div>
+        <div class="body-title">Measure two</div>
+        <div class="body-text">What this column tracks.</div>
+      </div>
+      <div>
+        <div class="body-title">Measure three</div>
+        <div class="body-text">What this column tracks.</div>
+      </div>
+      <div>
+        <div class="body-title">Measure four</div>
+        <div class="body-text">What this column tracks.</div>
+      </div>
+    </div>
+  </div>
+  <!-- while evidence is still outstanding, mark the slide instead of leaving placeholder copy in: -->
+  <!-- <span class="pending">Findings pending</span> -->
+</section>
+
+<!-- ============ 5. PROFILE — bio/case-study, photo + about + list left, media grid right ============ -->
+<section data-layout="profile" class="slide slide--dark" data-section="Team" data-title="Team member">
+  <div class="logo" data-logo></div>
+  <div class="profile">
+    <div>
+      <div class="profile-avatar"><img src="" alt="" data-placeholder></div>
+      <div class="profile-name">Name here</div>
+      <div class="profile-role">Role</div>
+      <div class="profile-section">
+        <span class="eyebrow">About</span>
+        <p class="body-text">Two or three sentences on relevant background. Declarative register, no filler.</p>
+      </div>
+      <div class="profile-section">
+        <span class="eyebrow">Relevant experience</span>
+        <ul class="profile-list">
+          <li><div class="body-title">Project one</div><div class="body-text">What was delivered.</div></li>
+          <li><div class="body-title">Project two</div><div class="body-text">What was delivered.</div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="profile-media">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. QUOTE — single large statement, use for testimonial/verbatim ============ -->
+<section data-layout="quote" class="slide slide--dark" data-section="Testimonial" data-title="Quote">
+  <div class="logo" data-logo></div>
+  <div class="quote">
+    <blockquote>&ldquo;A verbatim statement goes here, set large enough to stand on its own as the whole slide.&rdquo;</blockquote>
+    <cite>Name, role, organisation</cite>
+  </div>
+</section>
+
+<!-- ============ 7. METRICS — big-number row, use for headline results ============ -->
+<section data-layout="metrics" class="slide slide--light" data-section="Results" data-title="Headline results">
+  <div class="logo" data-logo></div>
+  <h2>Results heading</h2>
+  <div class="rule"></div>
+  <div class="content">
+    <div class="metrics">
+      <div class="metric">
+        <div class="value">24</div>
+        <div class="label">What this number measures.</div>
+      </div>
+      <div class="metric">
+        <div class="value">3.2x</div>
+        <div class="label">What this number measures.</div>
+      </div>
+      <div class="metric">
+        <div class="value">98%</div>
+        <div class="label">What this number measures.</div>
+      </div>
+      <div class="metric">
+        <div class="value">6wk</div>
+        <div class="label">What this number measures.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. CARDS — ruled cards, coral index over title and text, use for goals/pillars ============ -->
+<section data-layout="cards" class="slide slide--light" data-section="Goals" data-title="Three goals">
+  <div class="logo" data-logo></div>
+  <h2>Section heading</h2>
+  <div class="rule"></div>
+  <p class="lede">Optional one-line framing sentence for the slide.</p>
+  <div class="content" style="margin-top:48px">
+    <div class="metrics metrics--3 metrics--cards">
+      <div class="metric">
+        <div class="value">G1</div>
+        <div class="body-title">Card title</div>
+        <div class="body-text">One or two sentences. Declarative register, no filler.</div>
+      </div>
+      <div class="metric">
+        <div class="value">G2</div>
+        <div class="body-title">Card title</div>
+        <div class="body-text">One or two sentences. Declarative register, no filler.</div>
+      </div>
+      <div class="metric">
+        <div class="value">G3</div>
+        <div class="body-title">Card title</div>
+        <div class="body-text">One or two sentences. Declarative register, no filler.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. ROWS — ruled rows on the thirds: index, title, text; use for instructions/principles ============ -->
+<section data-layout="rows" class="slide slide--light" data-section="Instructions" data-title="Ruled rows">
+  <div class="logo" data-logo></div>
+  <h2>Section heading</h2>
+  <div class="rule"></div>
+  <div class="content">
+    <div class="rows">
+      <div class="row">
+        <div class="num">01</div>
+        <div class="body-title">Row title</div>
+        <div class="body-text">One to three sentences of explanation. Declarative register, no filler.</div>
+      </div>
+      <div class="row">
+        <div class="num">02</div>
+        <div class="body-title">Row title</div>
+        <div class="body-text">One to three sentences of explanation. Declarative register, no filler.</div>
+      </div>
+      <div class="row">
+        <div class="num">03</div>
+        <div class="body-title">Row title</div>
+        <div class="body-text">One to three sentences of explanation. Declarative register, no filler.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. CLOSE — dark, stack, use for the recommendation/decision slide ============ -->
+<section data-layout="close" class="slide slide--dark" data-section="Recommendation">
+  <div class="logo" data-logo></div>
+  <h2>Recommendation heading</h2>
+  <div class="rule"></div>
+  <div class="content">
+    <div class="stack">
+      <div class="item">
+        <div class="num">01</div>
+        <div>
+          <div class="body-title">Point title</div>
+          <div class="body-text">Supporting sentence.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="num">02</div>
+        <div>
+          <div class="body-title">Point title</div>
+          <div class="body-text">Supporting sentence.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- logo.js injects the mark into [data-logo]; deck.js supplies the bottom bar,
+     index panel and hover thumbnails at runtime. See design-notes.md §2 and §5. -->
+<script src="logo.js"></script>
+<script src="deck.js"></script>
+
+</body>
+</html>
