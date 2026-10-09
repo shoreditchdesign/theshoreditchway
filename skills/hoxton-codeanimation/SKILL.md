@@ -1,6 +1,6 @@
 ---
 name: hoxton-codeanimation
-description: Build a product walkthrough or explainer animation as one self-contained HTML/CSS/GSAP file that replaces an mp4 (sharp at any resolution, droppable into WordPress or Webflow). Guides the user step by step through the Shoreditch Design process, asking questions at each stage: storyboard frames from Figma or Paper, a script.md brief, a ms-level timeline.md, a static HTML rebuild from the design file, the GSAP master timeline with a fake cursor, a ?debug=1 scrub panel for timestamped feedback, and the client handoff. Use when someone asks for a code animation, an animated product walkthrough, an explainer video in HTML, an animatic, or to turn Figma or Paper frames into a looping animation.
+description: "Build a product walkthrough or explainer animation as one self-contained HTML/CSS/GSAP file that replaces an mp4 (sharp at any resolution, droppable into WordPress or Webflow). Guides the user step by step through the Shoreditch Design process, asking questions at each stage: storyboard frames from Figma or Paper, a script.md brief, a ms-level timeline.md, a static HTML rebuild from the design file, the GSAP master timeline with a fake cursor, a ?debug=1 scrub panel for timestamped feedback, and the client handoff. Use when someone asks for a code animation, an animated product walkthrough, an explainer video in HTML, an animatic, or to turn Figma or Paper frames into a looping animation."
 ---
 
 # Hoxton code animation
