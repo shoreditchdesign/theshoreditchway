@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Product Walkthrough — Starter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* =================================================================
+     TOKENS — swap the colour block per client; leave the motion block
+     alone unless timeline.md says otherwise. Every easing below has a
+     byte-identical GSAP CustomEase of the same short name further down
+     (std / emp / exit / float / settle), so CSS and JS never drift.
+     ================================================================= */
+  :root{
+    /* colour — neutral placeholders, replace from the client's Figma */
+    --bg-page:#E9ECEF;
+    --bg-frame:#FFFFFF;
+    --bg-shell:#F8F9FA;
+    --ink-900:#131313;
+    --ink-700:#343A3F;
+    --ink-500:#697077;
+    --ink-400:#A9A9AB;
+    --ink-300:#CED4DA;
+    --line:#EDEDED;
+    --skel:#F2F0F4;
+    --accent:#2D8FFF;
+    --accent-soft:#E5F7FF;
+    --glow-a:#94FFF2;
+    --glow-b:#0080FF;
+    --glow-c:#DD00FF;
+    --card-shadow:0 4px 8px -2px rgba(58,77,233,.15);
+
+    /* easing tokens (MD3-derived, "Corporate" personality) */
+    --ease-standard:   cubic-bezier(.2, 0, 0, 1);           /* on-screen moves, cursor travel */
+    --ease-emphasized: cubic-bezier(.05, .7, .1, 1);        /* entrances, hero reveals */
+    --ease-exit:       cubic-bezier(.3, 0, 1, 1);           /* exits, departures */
+    --ease-float:      cubic-bezier(.4, 0, .2, 1);          /* "paper" objects in flight (dragged chips) */
+    --ease-settle:     cubic-bezier(.175, .885, .32, 1.275);/* overshoot — punctuation moments ONLY */
+
+    /* duration tiers (ms) — JS mirrors these in DUR below */
+    --dur-quick:200ms;      /* click press/release halves */
+    --dur-standard:300ms;   /* card / element entrances, popups (280–320) */
+    --dur-slow:450ms;       /* layout pushes, panel dissolve */
+    --dur-dramatic:800ms;   /* count-ups, mask reveals, hero flights (700–900) */
+
+    font-family:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg-page);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:60px 20px;
+  }
+
+  /* ---------- scale-to-fit stage ----------
+     .stage IS the video frame — a fixed 1440x900 artboard, overflow:hidden.
+     That's the real crop edge; the app "window" is content sitting inset
+     inside it (213 / 173.5 margins) with room around it for things to fly
+     in/out of view and get cropped by the FRAME, not the window chrome.
+     Below 1440px wide the whole stage scales down as one rigid unit (like
+     a video) instead of reflowing — everything inside is absolutely
+     positioned / timed, so reflow would break layout AND animation sync.
+     JS sets --stage-scale. */
+  .stage-wrap{
+    width:100%;
+    max-width:1440px;
+    aspect-ratio:1440/900;
+    position:relative;
+  }
+  .stage{
+    width:1440px;
+    height:900px;
+    position:absolute;
+    top:0;
+    left:0;
+    background:var(--bg-frame);
+    overflow:hidden;
+    transform:scale(var(--stage-scale, 1));
+    transform-origin:top left;
+  }
+
+  /* ---------- app shell (the 1014x553 product window) ---------- */
+  .app-shell{
+    width:1014px;
+    height:553px;
+    position:absolute;
+    left:213px;
+    top:173.5px;
+    background:var(--bg-shell);
+    border-radius:12px;
+    box-shadow:0 0 1px rgba(29,28,29,.2), 0 8px 12px rgba(29,28,29,.1);
+    /* overflow intentionally NOT hidden — the .stage above is the real crop
+       boundary. Hidden here would also clip hover scale-ups that need to
+       render past the window's own edge. */
+  }
+  .titlebar{height:40px;display:flex;align-items:center;padding:0 16px;}
+  .dots{display:flex;gap:8px;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot.red{background:#FC605C;}
+  .dot.yellow{background:#FCBB40;}
+  .dot.green{background:#34C648;}
+
+  .body-row{display:flex;align-items:stretch;height:513px;}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{width:218px;flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;padding:4px;}
+  .nav-list{display:flex;flex-direction:column;gap:3px;}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;
+    padding:16px 12px;border-radius:7px;background:#fff;
+    border:1.5px solid transparent;cursor:default;position:relative;
+  }
+  /* gradient "angular stroke" overlay. A separate layer (not a class toggle
+     on the base element) so GSAP can crossfade its opacity instead of an
+     instant swap. Double-background trick: inner white fill clipped to
+     padding-box, gradient clipped to border-box underneath.
+     border-radius:inherit lets the same class sit on any rounded element. */
+  .nav-glow{
+    position:absolute;inset:0;z-index:0;border-radius:inherit;
+    background:
+      linear-gradient(#fff,#fff) padding-box,
+      linear-gradient(90deg,var(--glow-a) 27%,var(--glow-b) 68%,var(--glow-c) 88%) border-box;
+    border:1.5px solid transparent;
+    box-shadow:0 2px 6px rgba(22,230,255,.2);
+    opacity:0;pointer-events:none;
+  }
+  /* real content must sit ABOVE the glow overlay, not get painted over by it */
+  .nav-icon,.nav-text{position:relative;z-index:1;}
+  .nav-icon{width:33px;height:33px;flex-shrink:0;border-radius:8px;background:var(--accent-soft);}
+  .nav-text{display:flex;flex-direction:column;gap:6px;}
+  .nav-title{font-weight:600;font-size:15px;line-height:120%;color:var(--ink-700);}
+  .nav-sub{font-weight:500;font-size:12px;line-height:110%;color:var(--ink-400);}
+  .cta-pill{height:32px;display:flex;align-items:center;justify-content:center;border-radius:5px;background:var(--accent-soft);font-weight:500;font-size:12px;color:var(--ink-700);}
+
+  /* ---------- main / panels ----------
+     One panel per scene; body[data-scene] picks which is display:flex.
+     GSAP flips the attribute (reversible on scrub — see sceneSwap()). */
+  .main{flex:1;padding:4px;display:flex;flex-direction:column;}
+  .panel{display:none;flex-direction:column;gap:11px;width:100%;height:100%;}
+  [data-scene="overview"] .panel-overview{display:flex;}
+  [data-scene="detail"]   .panel-detail{display:flex;}
+
+  .card{background:#fff;border-radius:11px;box-shadow:var(--card-shadow);padding:16px;}
+  .card-title{font-weight:600;font-size:14px;color:var(--ink-900);}
+
+  /* ----- scene 1: overview ----- */
+  .top-row{display:flex;gap:11px;flex:1;}
+  .chart-card{flex:2.75;display:flex;flex-direction:column;gap:10px;position:relative;}
+  .chart-plot{flex:1;position:relative;}
+  .chart-plot svg{width:100%;height:100%;display:block;}
+  .kpi-card{flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+  .kpi-value{font-weight:700;font-size:56px;letter-spacing:-.03em;color:var(--ink-900);font-variant-numeric:tabular-nums;}
+  .kpi-sub{font-size:12px;color:var(--ink-500);}
+  .stat-row{display:flex;gap:11px;}
+  .stat-card{flex:1;display:flex;flex-direction:column;gap:14px;}
+  .stat-value{font-weight:700;font-size:20px;color:var(--ink-900);font-variant-numeric:tabular-nums;}
+  .sparkline{height:44px;width:100%;}
+  .sparkline svg{width:100%;height:100%;display:block;}
+
+  /* ----- scene 2: detail ----- */
+  .detail-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;}
+  .detail-title{font-weight:600;font-size:19px;color:var(--ink-700);}
+  .detail-btn{height:32px;display:flex;align-items:center;padding:0 14px;border-radius:7px;background:var(--accent);color:#fff;font-weight:600;font-size:12px;position:relative;}
+  .detail-list{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px;}
+  .list-row{display:flex;align-items:center;gap:14px;padding:14px;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--line);}
+  .skel-avatar{width:32px;height:32px;border-radius:6px;background:var(--skel);flex-shrink:0;}
+  .skel-lines{display:flex;flex-direction:column;gap:8px;flex:1;}
+  .skel-line{height:10px;border-radius:3px;background:var(--skel);}
+  .skel-line.w1{width:40%;}
+  .skel-line.w2{width:70%;}
+
+  /* popup — absolutely positioned inside .app-shell. Use % of the 1014x553
+     window (measured from Figma) so it holds its relative place at any
+     stage scale. */
+  .popup{position:absolute;opacity:0;width:34%;left:62%;top:22%;background:#fff;border-radius:14px;box-shadow:0 4px 27px rgba(0,0,0,.25);padding:16px;display:flex;flex-direction:column;gap:10px;z-index:5;}
+  .popup b{font-weight:700;font-size:14px;color:#000;}
+  .popup .skel-line{height:8px;}
+
+  /* ----- cursor overlay -----
+     left/top are just the anchor; position is GSAP transform x/y only —
+     no CSS transition here, avoids double-easing. transform-origin sits on
+     the arrow tip so the click bounce scales around the hotspot. */
+  .cursor-overlay{position:absolute;left:0;top:0;width:26px;height:41px;pointer-events:none;z-index:20;transform-origin:8px 6px;}
+  .cursor-overlay svg{width:100%;height:100%;}
+
+  /* ----- skeleton pulse -----
+     Placeholder bars never resolve to copy. They fade in with their group,
+     then idle-pulse for as long as they're visible. Driven by a data
+     attribute (not classList.add in a callback) so GSAP can set it AND
+     revert it when you scrub backwards — see skeletonOn(). */
+  @keyframes skeleton-pulse{ 0%,100%{opacity:1} 50%{opacity:.55} }
+  [data-skel="on"] .skel-line,
+  [data-skel="on"] .skel-avatar{animation:skeleton-pulse 1600ms ease-in-out infinite;}
+</style>
+</head>
+<body data-scene="overview">
+
+<div class="stage-wrap">
+<div class="stage">
+<div class="app-shell">
+  <div class="titlebar">
+    <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+  </div>
+
+  <div class="body-row">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="nav-list">
+        <div class="nav-item" data-nav="overview">
+          <div class="nav-icon"></div>
+          <div class="nav-text"><div class="nav-title">Overview</div><div class="nav-sub">Placeholder subtitle</div></div>
+          <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" data-nav="detail">
+          <div class="nav-icon"></div>
+          <div class="nav-text"><div class="nav-title">Detail</div><div class="nav-sub">Placeholder subtitle</div></div>
+          <div class="nav-glow"></div>
+        </div>
+      </div>
+      <div class="cta-pill">Call to action&nbsp;→</div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+
+      <!-- ---------- PANEL: OVERVIEW (scene 1) ---------- -->
+      <section class="panel panel-overview">
+        <div class="top-row">
+          <div class="card chart-card">
+            <div class="card-title">Chart title</div>
+            <div class="chart-plot">
+              <svg viewBox="0 0 400 170" preserveAspectRatio="none">
+                <g stroke="#F1F1F1" stroke-width="1">
+                  <line x1="0" y1="1" x2="400" y2="1"/><line x1="0" y1="56" x2="400" y2="56"/>
+                  <line x1="0" y1="113" x2="400" y2="113"/><line x1="0" y1="169" x2="400" y2="169"/>
+                </g>
+                <path class="chart-fill" d="M0 140 L70 120 L130 60 L190 90 L260 45 L330 70 L400 10 V170 H0Z" fill="var(--accent)" opacity=".12"/>
+                <path class="chart-line" d="M0 140 L70 120 L130 60 L190 90 L260 45 L330 70 L400 10" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card kpi-card">
+            <div class="card-title">Headline metric</div>
+            <div class="kpi-value" data-count-to="801">0</div>
+            <div class="kpi-sub">Placeholder caption</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="card stat-card">
+            <div class="card-title">Stat A</div><div class="stat-value" data-count-to="72" data-suffix="%">0%</div>
+            <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0 34 L20 28 L40 30 L60 16 L80 20 L100 6" fill="none" stroke="var(--accent)" stroke-width="2"/></svg></div>
+          </div>
+          <div class="card stat-card">
+            <div class="card-title">Stat B</div><div class="stat-value" data-count-to="1240">0</div>
+            <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0 30 L20 32 L40 22 L60 24 L80 12 L100 10" fill="none" stroke="var(--accent)" stroke-width="2"/></svg></div>
+          </div>
+          <div class="card stat-card">
+            <div class="card-title">Stat C</div><div class="stat-value" data-count-to="38" data-suffix="%">0%</div>
+            <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0 8 L20 14 L40 12 L60 24 L80 22 L100 32" fill="none" stroke="var(--accent)" stroke-width="2"/></svg></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- PANEL: DETAIL (scene 2) ---------- -->
+      <section class="panel panel-detail">
+        <div class="detail-header">
+          <div class="detail-title">Detail title</div>
+          <div class="detail-btn" id="detail-btn">Primary action</div>
+        </div>
+        <!-- data-skel flips "off" -> "on" from the timeline (reversible) -->
+        <div class="detail-list" data-skel="off">
+          <div class="list-row"><div class="skel-avatar"></div><div class="skel-lines"><div class="skel-line w1"></div><div class="skel-line w2"></div></div></div>
+          <div class="list-row"><div class="skel-avatar"></div><div class="skel-lines"><div class="skel-line w1"></div><div class="skel-line w2"></div></div></div>
+          <div class="list-row"><div class="skel-avatar"></div><div class="skel-lines"><div class="skel-line w1"></div><div class="skel-line w2"></div></div></div>
+          <div class="list-row"><div class="skel-avatar"></div><div class="skel-lines"><div class="skel-line w1"></div><div class="skel-line w2"></div></div></div>
+          <div class="list-row"><div class="skel-avatar"></div><div class="skel-lines"><div class="skel-line w1"></div><div class="skel-line w2"></div></div></div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /.body-row -->
+
+  <!-- popup lives on .app-shell (positioned), not inside a panel, so the
+       panel's own fade doesn't drag it along and its % coords are window-
+       relative -->
+  <div class="popup" id="popup" data-skel="off">
+    <b>Popup title</b>
+    <div class="skel-line w2"></div>
+    <div class="skel-line w1"></div>
+  </div>
+
+  <!-- inside .app-shell on purpose: every cursor coordinate is window-
+       relative (1014x553), so the numbers never need the .stage frame
+       offset (213,173.5) applied to them. -->
+  <div class="cursor-overlay">
+    <svg viewBox="0 0 26 41" fill="none">
+        <path d="M21.6 35c.4 1 0 4.9-2.2 5.8-1.7.7-3.8.3-4.7.1-.3-.1-.5-.3-.6-.5l-4.4-8.8c-.3-.6-1.1-.7-1.6-.3l-6.3 6.3c-.6.6-1.7.2-1.7-.7V1c0-.9 1.1-1.3 1.7-.7l24.2 24.2c.6.6.2 1.7-.7 1.7h-6.2c-.8 0-1.3.8-.9 1.5 1.1 2.3 3.1 6.3 3.5 7.3Z" fill="#fff"/>
+      <path d="M2.4 6.9c0-.9 1.1-1.3 1.7-.7l16 16c.6.6.2 1.7-.7 1.7h-4.4c-.8 0-1.3.8-.9 1.5l5.2 10.5c.4.8-.4 1.9-1.2 2.4-.5.4-1.4.2-2 .1a1 1 0 0 1-.6-.5L10.3 27.5c-.3-.6-1.1-.7-1.6-.2L4.1 31.8c-.6.6-1.7.2-1.7-.7V6.9Z" fill="#000"/>
+    </svg>
+  </div>
+</div><!-- /.app-shell -->
+
+<!-- stage-level elements (things that fly in from OFF the window, e.g. a
+     dragged card) go here, NOT inside .app-shell: their x/y are then
+     .stage-relative frame coordinates (1440x900). -->
+
+</div>
+</div>
+
+<!-- pinned versions — same as the first shipped build -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/MotionPathPlugin.min.js"></script>
+<script>
+  // scale-to-fit: stage is authored at a fixed 1440x900 (the real video
+  // frame), scaled as one rigid unit below that width instead of
+  // reflowing (see .stage-wrap css)
+  (function(){
+    var wrap = document.querySelector('.stage-wrap');
+    var stage = document.querySelector('.stage');
+    function setScale(){
+      stage.style.setProperty('--stage-scale', wrap.clientWidth / 1440);
+    }
+    new ResizeObserver(setScale).observe(wrap);
+    setScale();
+  })();
+</script>
+
+<script>
+  // ===================================================================
+  // Animation build. Every ms / distance / easing here should map to a
+  // row in timeline.md — that file is the source of truth, this is its
+  // execution. Times inside a scene function are seconds from that
+  // scene's own t=0.
+  // ===================================================================
+  gsap.registerPlugin(CustomEase, MotionPathPlugin);
+
+  // easing tokens — CustomEase path for a single cubic is
+  // M0,0 C x1,y1 x2,y2 1,1, i.e. the literal cubic-bezier control points,
+  // byte-identical to the --ease-* CSS vars.
+  CustomEase.create('std',    'M0,0 C0.2,0 0,1 1,1');           // --ease-standard
+  CustomEase.create('emp',    'M0,0 C0.05,0.7 0.1,1 1,1');      // --ease-emphasized
+  CustomEase.create('exit',   'M0,0 C0.3,0 1,1 1,1');           // --ease-exit
+  CustomEase.create('float',  'M0,0 C0.4,0 0.2,1 1,1');         // --ease-float
+  CustomEase.create('settle', 'M0,0 C0.175,0.885 0.32,1.275 1,1'); // --ease-settle
+
+  // duration tiers in seconds (mirror --dur-* above)
+  var DUR = { quick:.2, standard:.3, slow:.45, dramatic:.8 };
+
+  var $  = function(sel, ctx){ return (ctx||document).querySelector(sel); };
+  var $$ = function(sel, ctx){ return [].slice.call((ctx||document).querySelectorAll(sel)); };
+
+  var body = document.body;
+  var appShell = $('.app-shell');
+  var cursor = $('.cursor-overlay');
+
+  // -------------------------------------------------------------------
+  // targetOf(el, sceneKey) — window-relative (1014x553) centre of an
+  // element, for cursor targets. Measured at BUILD time with offsetLeft/
+  // offsetTop (layout boxes, so unaffected by GSAP transforms or the
+  // stage scale). Panels for later scenes are display:none at build time
+  // and would measure as 0,0 (that sent the first build's cursor off-frame) — so
+  // this temporarily flips body[data-scene] to the owning scene, measures,
+  // and flips it back. Pass dx/dy to nudge off-centre.
+  // -------------------------------------------------------------------
+  function targetOf(el, sceneKey, dx, dy){
+    var prev = body.getAttribute('data-scene');
+    if (sceneKey) body.setAttribute('data-scene', sceneKey);
+    var x = 0, y = 0, n = el;
+    while (n && n !== appShell){ x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+    var out = { x: x + el.offsetWidth/2 + (dx||0), y: y + el.offsetHeight/2 + (dy||0) };
+    body.setAttribute('data-scene', prev);
+    return out;
+  }
+
+  // cursor rest / anchor points (window-relative)
+  var STAGE_CENTER = {x:507, y:276};
+  var SIDEBAR_REST = {x:110, y:15};
+  var NAV = {};
+  $$('.nav-item').forEach(function(el){ NAV[el.getAttribute('data-nav')] = targetOf(el, null, -40, 0); });
+  var navGlow = {};
+  $$('.nav-item').forEach(function(el){ navGlow[el.getAttribute('data-nav')] = $('.nav-glow', el); });
+  var allGlows = Object.keys(navGlow).map(function(k){ return navGlow[k]; });
+
+  // ===================================================================
+  // HELPERS — every one takes the timeline + a position param, so scenes
+  // read as a list of beats.
+  // ===================================================================
+
+  // build-time tracker of where the cursor will be, so each move only
+  // needs a destination and scenes don't have to hand-carry `from` points
+  var cursorAt = {x:STAGE_CENTER.x, y:STAGE_CENTER.y};
+
+  // cursor travel with a subtle perpendicular arc at the midpoint (Disney
+  // Arcs, corporate = subtle). ONE tween along a bezier through the offset
+  // waypoint — not two chained legs. Two legs each with their own ease
+  // decelerate to a dead stop at the midpoint then re-accelerate, which
+  // reads as jittery / slide-to-slide. Arc offset scales with distance
+  // (clamped 10–28px) so short hops don't flick and long ones still curve.
+  // Explicit start point in the path, since the element may not already
+  // be at `from` when the playhead jumps here.
+  function arcMove(tl, to, dur, ease, pos, from){
+    from = from || cursorAt;
+    var dx=to.x-from.x, dy=to.y-from.y, len=Math.hypot(dx,dy)||1;
+    var off=Math.max(10, Math.min(28, len*0.12));
+    var mx=(from.x+to.x)/2 - dy/len*off, my=(from.y+to.y)/2 + dx/len*off;
+    tl.to(cursor, {
+      motionPath:{ path:[{x:from.x,y:from.y}, {x:mx,y:my}, {x:to.x,y:to.y}], curviness:1.25 },
+      duration:dur, ease:ease||'std'
+    }, pos);
+    cursorAt = {x:to.x, y:to.y};
+  }
+  // distance-scaled travel time (base 300ms; 50px=.8x … 400px+=1.6x)
+  function travelDur(to, from){
+    from = from || cursorAt;
+    var d = Math.hypot(to.x-from.x, to.y-from.y);
+    var k = d<=50?.8 : d<=100?1 : d<=200?1.3 : d<=300?1.5 : d<=400?1.6 : 1.8;
+    return +(0.3*k).toFixed(3);
+  }
+
+  // the one click-bounce recipe, reused everywhere: 1 -> .85 -> 1.08 -> 1
+  // (300ms total; the press bottoms out at +90ms — sync state changes there)
+  var PRESS = .09;
+  function clickBounce(tl, el, pos){
+    tl.to(el, {scale:0.85, duration:.09, ease:'std'}, pos)
+      .to(el, {scale:1.08, duration:.11, ease:'settle'})
+      .to(el, {scale:1.0,  duration:.10, ease:'std'});
+  }
+
+  // panel / card / popup entrance: scale .95 -> 1 + fade, emphasized
+  function panelIn(tl, el, pos, opts){
+    opts = opts || {};
+    tl.fromTo(el, {autoAlpha:0, scale:opts.from||0.95, transformOrigin:'center center'},
+                  {autoAlpha:1, scale:1, duration:opts.dur||DUR.standard, ease:'emp', immediateRender:false}, pos);
+  }
+  // exit: dissolve in place, or fly (dx,dy) toward the frame edge. Opacity
+  // fades faster than the move so it visibly dissolves mid-flight rather
+  // than being visible right up to the frame edge.
+  function panelOut(tl, el, pos, dx, dy){
+    if (dx || dy){
+      tl.to(el, {autoAlpha:0, duration:.12, ease:'exit'}, pos);
+      tl.to(el, {x:dx, y:dy, scale:0.35, duration:.3, ease:'exit'}, pos);
+    } else {
+      tl.to(el, {autoAlpha:0, duration:.25, ease:'exit'}, pos);
+    }
+  }
+
+  // stagger fade-rise: items start hidden + `dy` low, rise in one by one
+  function staggerRise(tl, els, pos, opts){
+    opts = opts || {};
+    tl.fromTo(els, {autoAlpha:0, y:opts.dy||12},
+      {autoAlpha:1, y:0, duration:opts.dur||.22, ease:opts.ease||'std', stagger:opts.gap||.06, immediateRender:false}, pos);
+  }
+
+  // count-up into an element's text. Tweens a proxy object, so it's fully
+  // scrubbable (seek backwards and the number goes back down). Reads the
+  // target from data-count-to, optional data-suffix.
+  function countUp(tl, el, pos, dur){
+    var to = parseFloat(el.getAttribute('data-count-to'));
+    var suffix = el.getAttribute('data-suffix') || '';
+    var proxy = {v:0};
+    var render = function(){ el.textContent = Math.round(proxy.v).toLocaleString('en-GB') + suffix; };
+    tl.fromTo(proxy, {v:0}, {v:to, duration:dur||DUR.dramatic, ease:'std', onUpdate:render, immediateRender:false}, pos);
+  }
+
+  // clip-path mask reveal, left -> right. Starts from `startPct` hidden on
+  // the right (100 = fully hidden; the first build's chart used 80 so a stub of
+  // line was already there on entrance).
+  function maskReveal(tl, els, pos, dur, startPct){
+    var hidden = 'inset(0% '+(startPct==null?100:startPct)+'% 0% 0%)';
+    tl.fromTo(els, {clipPath:hidden}, {clipPath:'inset(0% 0% 0% 0%)', duration:dur||DUR.dramatic, ease:'std', immediateRender:false}, pos);
+  }
+
+  // skeleton pulse on/off — attribute set via GSAP so scrubbing backwards
+  // past it reverts it (a tl.call(classList.add) would not)
+  function skeletonOn(tl, el, pos){ tl.set(el, {attr:{'data-skel':'on'}}, pos); }
+
+  // nav click + panel swap in one beat: bounce, then at press-bottom flip
+  // body[data-scene], clear every glow, crossfade this nav's glow in.
+  // The swap happens at ARRIVAL, not at the scene label — the label marks
+  // the start of the travel, and swapping there made the next panel
+  // appear before the cursor reached the tab.
+  function navClick(tl, key, pos){
+    clickBounce(tl, cursor, pos);
+    var press = pos + PRESS;
+    tl.set(body, {attr:{'data-scene':key}}, press)
+      .set(allGlows, {autoAlpha:0}, press)
+      .to(navGlow[key], {autoAlpha:1, duration:.22, ease:'std'}, press);
+  }
+
+  // ===================================================================
+  // SCENES — one function per scene, each returns its own sub-timeline.
+  // A scene owns: its travel IN to its nav item, the click, its reset
+  // (.set to pristine — runs every loop), its beats, and its exit. That
+  // makes scenes reorderable and lets each be built/tuned in isolation.
+  // ===================================================================
+
+  // -------------------------------------------------------------
+  // SCENE 1 — Overview
+  // -------------------------------------------------------------
+  function sceneOverview(){
+    var tl = gsap.timeline();
+    var panel = $('.panel-overview');
+    var chartCard = $('.chart-card', panel), kpiCard = $('.kpi-card', panel);
+    var statCards = $$('.stat-card', panel);
+    var cards = [chartCard, kpiCard].concat(statCards);
+    var chartMask = [$('.chart-line', panel), $('.chart-fill', panel)];
+    var sparklines = $$('.sparkline', panel);
+    var counters = $$('[data-count-to]', panel);
+
+    // reset — everything this scene touches, back to pristine, every loop
+    tl.set(body, {attr:{'data-scene':'overview'}}, 0)
+      .set(cursor, {x:STAGE_CENTER.x, y:STAGE_CENTER.y, scale:1, autoAlpha:0}, 0)
+      .set(allGlows, {autoAlpha:0}, 0)
+      .set(cards, {autoAlpha:0, scale:0.92, zIndex:0, transformOrigin:'center center'}, 0)
+      .set(sparklines, {clipPath:'inset(0% 100% 0% 0%)'}, 0)
+      .set(chartMask, {clipPath:'inset(0% 80% 0% 0%)'}, 0);
+    counters.forEach(function(el){ el.textContent = '0' + (el.getAttribute('data-suffix')||''); });
+    cursorAt = {x:STAGE_CENTER.x, y:STAGE_CENTER.y};
+
+    // cursor fades in at stage centre, arcs to the nav item, clicks
+    tl.to(cursor, {autoAlpha:1, duration:.2, ease:'std'}, 0);
+    arcMove(tl, NAV.overview, .48, 'std', .2);
+    navClick(tl, 'overview', .68);
+
+    // cards cascade in, 70ms stagger, hero leads
+    cards.forEach(function(el, i){
+      tl.to(el, {autoAlpha:1, scale:1, duration:.28, ease:'emp'}, .85 + i*.07);
+    });
+
+    // count-ups start as each card lands
+    countUp(tl, counters[0], 1.0);
+    counters.slice(1).forEach(function(el, i){ countUp(tl, el, 1.13 + i*.07, .7); });
+
+    // sparklines: three different starts, ONE landing beat (all end ~2.17)
+    sparklines.forEach(function(el, i){
+      var start = 1.27 + i*.07;
+      maskReveal(tl, el, start, 2.17 - start, 100);
+    });
+
+    // hold on the nav, then hover the hero card: scale up (stays scaled),
+    // chart line mask-reveals. zIndex so the scale renders over siblings.
+    var chartTarget = targetOf(chartCard, 'overview', -60, -20);
+    arcMove(tl, chartTarget, travelDur(chartTarget), 'std', 1.6);
+    tl.set(chartCard, {zIndex:10}, 1.99)
+      .to(chartCard, {scale:1.06, duration:.35, ease:'emp'}, 1.99);
+    maskReveal(tl, chartMask, 1.99, .75, 80);
+
+    // exit: cards dissolve, reverse micro-stagger. The cursor's travel to
+    // the next nav item belongs to the NEXT scene.
+    cards.slice().reverse().forEach(function(el, i){
+      tl.to(el, {autoAlpha:0, scale:0.96, duration:.2, ease:'exit'}, 3.09 + i*.04);
+    });
+    return tl;
+  }
+
+  // -------------------------------------------------------------
+  // SCENE 2 — Detail
+  // -------------------------------------------------------------
+  function sceneDetail(){
+    var tl = gsap.timeline();
+    var panel = $('.panel-detail');
+    var header = $('.detail-header', panel), btn = $('#detail-btn');
+    var list = $('.detail-list', panel), rows = $$('.list-row', panel);
+    var popup = $('#popup');
+
+    // travel in from wherever scene 1 left the cursor
+    var inDur = travelDur(NAV.detail);
+    arcMove(tl, NAV.detail, inDur, 'std', 0);
+    var arrive = inDur - PRESS;        // click lands as travel ends
+
+    // reset at ARRIVAL (see navClick) — nothing in this panel is visible
+    // before then anyway, since the panel is display:none until the swap
+    tl.set([header].concat(rows), {autoAlpha:0, y:0}, 0)
+      .set(list, {autoAlpha:1, attr:{'data-skel':'off'}}, 0)
+      .set(popup, {autoAlpha:0, x:0, y:0, scale:0.95, attr:{'data-skel':'off'}}, 0);
+    navClick(tl, 'detail', arrive);
+
+    var t = arrive + .3;
+    panelIn(tl, header, t, {from:0.98});
+    staggerRise(tl, rows, t + .1, {gap:.06});
+    skeletonOn(tl, list, t + .1 + rows.length*.06 + .22);
+
+    // cursor to the primary button, click, popup enters
+    var btnTarget = targetOf(btn, 'detail');
+    t = t + .6;
+    var d = travelDur(btnTarget);
+    arcMove(tl, btnTarget, d, 'std', t);
+    clickBounce(tl, cursor, t + d);
+    clickBounce(tl, btn, t + d);     // the button reacts too
+    panelIn(tl, popup, t + d + PRESS, {dur:.32});
+    skeletonOn(tl, popup, t + d + PRESS + .32);
+
+    // hold, then popup flies out toward the frame edge, panel dissolves,
+    // cursor returns to rest and fades (clean loop seam back to scene 1)
+    t = t + d + 1.6;
+    panelOut(tl, popup, t, 200, -180);
+    panelOut(tl, [header, list], t + .2);
+    arcMove(tl, SIDEBAR_REST, .42, 'exit', t + .2);
+    tl.to(cursor, {autoAlpha:0, duration:.2, ease:'exit'}, t + .5);
+    return tl;
+  }
+
+  // ===================================================================
+  // MASTER TIMELINE
+  // Each scene gets a label at its start; sceneLabels maps nav key ->
+  // label (the debug scrubber and the nav-click QA hook both read it).
+  // ===================================================================
+  var PLAYBACK_RATE = 1;   // global speed lever — the first build shipped at .5 after feedback
+  var master = gsap.timeline({repeat:-1, repeatDelay:.4});
+  var sceneLabels = {};
+
+  // overlap > 0 starts a scene before the previous one fully ends (e.g.
+  // the next scene's cursor travel runs under the previous exit fade)
+  function addScene(key, label, build, overlap){
+    var at = Math.max(0, master.duration() - (overlap||0));
+    master.addLabel(label, at);
+    master.add(build(), label);
+    sceneLabels[key] = label;
+  }
+  addScene('overview', 'scene1', sceneOverview);
+  addScene('detail',   'scene2', sceneDetail, .2);
+
+  master.timeScale(PLAYBACK_RATE); // scales every duration / stagger / delay above
+
+  // manual QA affordance: click a nav item to seek straight to its scene
+  $$('.nav-item').forEach(function(el){
+    el.addEventListener('click', function(){
+      master.seek(sceneLabels[el.getAttribute('data-nav')]);
+      master.play();
+    });
+  });
+</script>
+
+<!-- ===================================================================
+     DEV-ONLY — delete this whole <script> block before handing the embed
+     to the client. Nothing above this line depends on it (it only READS
+     `master`/`sceneLabels` from the block above, doesn't add anything
+     those need); nothing below exists. Self-contained, safe to cut as one
+     piece: everything from here to the closing </script> tag, inclusive.
+     Hidden unless ?debug=1 is in the URL either way, but it's still
+     several KB of code + the debug UI markup/CSS worth stripping for a
+     production embed.
+     =================================================================== -->
+<script>
+  // Dev scrubber — hidden unless ?debug=1. Deep-link with &t=<seconds>
+  // (auto-pauses at that exact frame) and/or &speed=<rate>. "copy link"
+  // captures the current time+speed into the URL for round-tripping.
+  // Contract: needs a global `master` (gsap timeline) and `sceneLabels`
+  // ({navKey: 'labelName'}); scene buttons are generated from sceneLabels.
+  (function(){
+    var params = new URLSearchParams(location.search);
+    if (!params.has('debug')) return;
+
+    var speedParam = parseFloat(params.get('speed'));
+    if (!isNaN(speedParam) && speedParam > 0) master.timeScale(speedParam);
+
+    var tParam = parseFloat(params.get('t'));
+    if (!isNaN(tParam)) { master.pause(); master.seek(Math.min(Math.max(tParam, 0), master.duration()), false); }
+
+    var style = document.createElement('style');
+    style.textContent =
+      '#dev-scrubber{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;gap:10px;'+
+      'padding:8px 14px;background:rgba(20,20,22,.92);backdrop-filter:blur(6px);'+
+      'font:12px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#eee;}'+
+      '#dev-scrubber input[type=range]{flex:1;accent-color:#16E6FF;}'+
+      '#dev-scrubber button{background:#2a2a2e;color:#eee;border:1px solid #444;border-radius:5px;padding:4px 10px;cursor:pointer;font:inherit;}'+
+      '#dev-scrubber button:hover{background:#3a3a3f;}'+
+      '#dev-scrubber button.active{background:#0B7285;border-color:#16E6FF;}'+
+      '#dev-scrubber input[type=number]{background:#1a1a1c;color:#eee;border:1px solid #444;border-radius:4px;padding:3px 4px;font:inherit;}'+
+      '#dev-scrubber #dv-time{font-variant-numeric:tabular-nums;white-space:nowrap;}'+
+      '#dev-scrubber .dv-scenes{display:flex;gap:3px;}';
+    document.head.appendChild(style);
+
+    var sceneButtons = Object.keys(sceneLabels).map(function(k, i){
+      return '<button data-scene="'+k+'" type="button" title="'+k+'">'+(i+1)+'</button>';
+    }).join('');
+
+    var bar = document.createElement('div');
+    bar.id = 'dev-scrubber';
+    bar.innerHTML =
+      '<button id="dv-play" type="button" title="play/pause"></button>'+
+      '<input id="dv-seek" type="range" min="0" step="0.01">'+
+      '<span id="dv-time">0.00 / 0.00</span>'+
+      '<label>speed <input id="dv-speed" type="number" step="0.05" min="0.05" style="width:52px"></label>'+
+      '<span class="dv-scenes">'+ sceneButtons +'</span>'+
+      '<button id="dv-copy" type="button">copy link</button>';
+    document.body.appendChild(bar);
+
+    var playBtn = bar.querySelector('#dv-play');
+    var seek = bar.querySelector('#dv-seek');
+    var timeLabel = bar.querySelector('#dv-time');
+    var speedInput = bar.querySelector('#dv-speed');
+    var copyBtn = bar.querySelector('#dv-copy');
+    var dur = master.duration();
+    var scrubbing = false;
+
+    seek.max = dur;
+    speedInput.value = master.timeScale();
+
+    function fmt(n){ return n.toFixed(2); }
+    function activeScene(){
+      var t = master.time(), best = null;
+      Object.keys(sceneLabels).forEach(function(k){
+        var lt = master.labels[sceneLabels[k]];
+        if (lt !== undefined && lt <= t + 0.001) best = k;
+      });
+      return best;
+    }
+    function syncUI(){
+      if (!scrubbing) seek.value = master.time();
+      timeLabel.textContent = fmt(master.time()) + ' / ' + fmt(dur);
+      playBtn.textContent = master.paused() ? '▶' : '⏸';
+      var scene = activeScene();
+      bar.querySelectorAll('.dv-scenes button').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-scene') === scene);
+      });
+    }
+
+    seek.addEventListener('pointerdown', function(){ scrubbing = true; master.pause(); });
+    seek.addEventListener('input', function(){ master.seek(parseFloat(seek.value), false); syncUI(); });
+    seek.addEventListener('pointerup', function(){ scrubbing = false; });
+
+    playBtn.addEventListener('click', function(){
+      if (master.paused()) master.play(); else master.pause();
+      syncUI();
+    });
+
+    speedInput.addEventListener('change', function(){
+      var v = parseFloat(speedInput.value);
+      if (v > 0) master.timeScale(v);
+    });
+
+    bar.querySelectorAll('.dv-scenes button').forEach(function(b){
+      b.addEventListener('click', function(){
+        master.pause();
+        master.seek(sceneLabels[b.getAttribute('data-scene')], false);
+        syncUI();
+      });
+    });
+
+    copyBtn.addEventListener('click', function(){
+      var url = new URL(location.href);
+      url.searchParams.set('debug', '1');
+      url.searchParams.set('t', master.time().toFixed(3));
+      url.searchParams.set('speed', master.timeScale());
+      // filename + query only — not the full directory path, this'll differ
+      // per machine/host anyway (local server, file://, WordPress, ...)
+      var str = url.pathname.split('/').pop() + url.search;
+      navigator.clipboard.writeText(str).then(function(){
+        copyBtn.textContent = 'copied!';
+        setTimeout(function(){ copyBtn.textContent = 'copy link'; }, 1000);
+      }).catch(function(){
+        window.prompt('Clipboard blocked — copy manually:', str); // e.g. file:// or denied permission
+      });
+    });
+
+    gsap.ticker.add(syncUI);
+    syncUI();
+  })();
+</script>
+
+</body>
+</html>

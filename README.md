@@ -19,6 +19,7 @@ For claude.ai, zip the skill folder (e.g. `skills/hoxton-slides/`) and upload it
 | Skill | What |
 |---|---|
 | `skills/hoxton-slides/` | Presentation decks as HTML from the Hoxton layout library. Preview: `/skills/hoxton-slides/` |
+| `skills/hoxton-codeanimation/` | Explainer and product-walkthrough animations as one HTML/CSS/GSAP file, guided step by step: Figma or Paper frames, script, timeline, HTML rebuild, debug panel, handoff. Preview: `/skills/hoxton-codeanimation/templates/starter.html?debug=1` |
 
 ## Adding a skill
 
