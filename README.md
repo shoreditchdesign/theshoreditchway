@@ -21,6 +21,10 @@ For claude.ai, zip the skill folder (e.g. `skills/hoxton-slides/`) and upload it
 | `skills/hoxton-slides/` | Presentation decks as HTML from the Hoxton layout library. Preview: `/skills/hoxton-slides/` |
 | `skills/hoxton-codeanimation/` | Explainer and product-walkthrough animations as one HTML/CSS/GSAP file, guided step by step: Figma or Paper frames, script, timeline, HTML rebuild, debug panel, handoff. Preview: `/skills/hoxton-codeanimation/templates/starter.html?debug=1` |
 
+## Tone of voice
+
+Every skill that writes copy for Shoreditch (slides, animations, documents) follows [`skills/hoxton-slides/TONE_OF_VOICE.md`](skills/hoxton-slides/TONE_OF_VOICE.md). It sets a formal register, short noun headings, no explanatory subheadings, and a list of banned AI-writing patterns and words. Read it before writing any client-facing or internal copy.
+
 ## Adding a skill
 
 Create `skills/<name>/SKILL.md` with `name` and `description` frontmatter, plus any files it needs alongside. Lowercase kebab-case for folders and files; `SKILL.md` and `README.md` stay uppercase because agents and GitHub look for those exact names.

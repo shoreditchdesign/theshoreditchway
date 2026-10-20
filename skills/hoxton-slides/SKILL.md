@@ -18,12 +18,13 @@ Live preview of every layout: https://theshoreditchway.vercel.app/skills/hoxton-
 | `logo.js` | Injects the logo into `[data-logo]` as a PNG: `logo-dark.png` on light slides, `logo-light.png` on dark slides. Swap the two PNGs for a client deck. |
 | `logo-dark.png` / `logo-light.png` | Shoreditch mark, black and white, 505×165. |
 | `deck.js` | Navigation engine: bottom bar, index panel, hover thumbnails, presenter notes drawer (N or the right-edge chevron), slide footer, `?slide=N`, arrow keys, fullscreen, print. Copy unchanged. |
+| `TONE_OF_VOICE.md` | Required. Register, heading and body rules, banned AI-writing patterns and words. Read before writing any slide copy. |
 | `design-notes.md` | Rules: themes, type, layout, components, content register. Read before writing. |
 | `logo.svg` | Shoreditch mark as a vector, for reference. Decks use the PNGs. |
 
 ## Workflow
 
-1. Read `design-notes.md` and `index.html` from this skill folder.
+1. Read `TONE_OF_VOICE.md`, `design-notes.md` and `index.html` from this skill folder.
 2. Outline the deck as a list of slides, each mapped to a layout below. Confirm the outline with the user before writing slides.
 3. Create a folder for the deck. Don't copy `deck.css`, `logo.js` or `deck.js` into it: link the live copies from `https://theshoreditchway.vercel.app/skills/hoxton-slides/`, so every deck picks up library fixes on reload. Copy them locally only for an offline or single-file handoff.
 4. Write `index.html` in that folder: same `<head>` as the library (font links + the live `deck.css`), then one `<section>` per slide copied from the matching library layout, then the live `logo.js` and `deck.js` scripts at the end of `<body>`:
@@ -35,6 +36,7 @@ Live preview of every layout: https://theshoreditchway.vercel.app/skills/hoxton-
    ```
 5. Every slide keeps `<div class="logo" data-logo></div>`, a `data-section` label (it also feeds the footer's chapter name), and a `data-title` if it has no `h1`/`h2`. Presenter notes go in an `<aside class="notes">` inside the slide; deck.js shows them in the right-hand notes drawer (N or the right-edge chevron).
 6. Open the file in a browser and step through every slide to check nothing overflows the 1440×800 frame.
+7. Check every slide against the final check in `TONE_OF_VOICE.md` before handover.
 
 If the environment can't read local skill files, fetch them from `https://theshoreditchway.vercel.app/skills/hoxton-slides/<file>`.
 
@@ -92,6 +94,8 @@ Content that fits none of these: ask the user before inventing a layout. A new l
 - The slide's message goes in the body or a `statement` slide, never in the heading.
 
 ## Writing: Simplified Technical English, about 80%
+
+**`TONE_OF_VOICE.md` governs all slide copy and overrides this section where they differ.** In short: formal register; noun headings of 1 to 3 words; no lede that restates the heading; no conversational framing; and none of the banned AI-writing patterns. The rules below apply on top of it.
 
 Write slide copy to the rules of Simplified Technical English (ASD-STE100), the controlled language for aerospace and industrial manuals. It makes text fast to scan and stops filler. Apply it about 80% of the way: follow the rules below by default, and break one only where the brand voice or a client's own terms need it.
 
