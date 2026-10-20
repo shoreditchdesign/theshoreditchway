@@ -7,8 +7,8 @@ and easing. When a timing tweak lands in code, update this file in the same
 change so it never drifts from the build.
 
 Times are ms relative to each scene's own start (t=0 = scene begins).
-Coordinates are x,y in .stage space (<W>×<H>, the full video frame, matches index.html).
-Cursor coordinates may be relative to the app window inside it; say which.
+Coordinates are x,y in frame space (<W>×<H>, the full video frame, matches index.html).
+Cursor coordinates may be relative to the product window inside it; say which.
 Flag open questions with 🟡 and recap them at the bottom.
 -->
 
@@ -40,7 +40,7 @@ Matching GSAP names: `std`, `emp`, `exit`, `float`, `settle`.
 ### Global rules
 
 - **Click bounce** (every click): scale `1 → 0.85 (90ms, std) → 1.08 (110ms, settle) → 1.0 (100ms, std)`. 300ms total.
-- **Cursor travel**: base 300ms scaled by distance (50px 0.8x, 100px 1.0x, 200px 1.3x, 300px 1.5x, 400px 1.6x, full stage 1.8–2.0x), `std`, 10–15px arc at the midpoint for anything over ~100px.
+- **Cursor travel**: base 300ms scaled by distance (50px 0.8x, 100px 1.0x, 200px 1.3x, 300px 1.5x, 400px 1.6x, full frame 1.8–2.0x), `std`, 10–15px arc at the midpoint for anything over ~100px.
 - **Nav active state**: crossfade in over 220ms `std`, starting when the click press bottoms out (~90ms into the bounce).
 - **Scene exit**: content dissolves `opacity 1→0` 250ms `exit`. The cursor goes straight to the next scene's nav item in one arc. No detour back to a rest point.
 - **Panel swap** fires on cursor arrival/click, not at the scene label (the label marks the start of travel).
@@ -52,7 +52,7 @@ Matching GSAP names: `std`, `emp`, `exit`, `float`, `settle`.
 
 | Name | x,y | Used for |
 |---|---|---|
-| stage-center | <x,y> | opening only |
+| window-center | <x,y> | opening only |
 | rest | <x,y> | loop seam only (end of last scene, start of first) |
 | nav-<item> | <x,y> | each nav item centre |
 
@@ -66,8 +66,8 @@ Resolved: <interpretive calls confirmed with the user.>
 
 | t (ms) | Element | Action | Dur | Easing | Notes |
 |---|---|---|---|---|---|
-| 0–200 | `.cursor` | fade in at stage-center | 200 | std | |
-| 200–680 | `.cursor` | travel stage-center → nav-<item> (454px) | 480 | std | 15px arc |
+| 0–200 | `.cursor` | fade in at window-center | 200 | std | |
+| 200–680 | `.cursor` | travel window-center → nav-<item> (<n>px) | 480 | std | 15px arc |
 | 680–980 | `.cursor` | click bounce | 300 | global | |
 | 770–990 | `.nav-item[data-nav=<item>]` | active crossfade | 220 | std | starts at press-bottom |
 | ... | | | | | |

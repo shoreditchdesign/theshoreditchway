@@ -37,7 +37,7 @@
     --ease-standard:   cubic-bezier(.2, 0, 0, 1);           /* on-screen moves, cursor travel */
     --ease-emphasized: cubic-bezier(.05, .7, .1, 1);        /* entrances, hero reveals */
     --ease-exit:       cubic-bezier(.3, 0, 1, 1);           /* exits, departures */
-    --ease-float:      cubic-bezier(.4, 0, .2, 1);          /* "paper" objects in flight (dragged chips) */
+    --ease-float:      cubic-bezier(.4, 0, .2, 1);          /* objects in flight (dragged, thrown) */
     --ease-settle:     cubic-bezier(.175, .885, .32, 1.275);/* overshoot — punctuation moments ONLY */
 
     /* duration tiers (ms) — JS mirrors these in DUR below */
@@ -58,44 +58,54 @@
     padding:60px 20px;
   }
 
-  /* ---------- scale-to-fit stage ----------
-     .stage IS the video frame — a fixed 1440x900 artboard, overflow:hidden.
-     That's the real crop edge; the app "window" is content sitting inset
-     inside it (213 / 173.5 margins) with room around it for things to fly
-     in/out of view and get cropped by the FRAME, not the window chrome.
-     Below 1440px wide the whole stage scales down as one rigid unit (like
-     a video) instead of reflowing — everything inside is absolutely
-     positioned / timed, so reflow would break layout AND animation sync.
-     JS sets --stage-scale. */
-  .stage-wrap{
+  /* ---------- scale-to-fit frame ----------
+     .frame IS the video frame: a fixed-size artboard, overflow:hidden. That
+     is the real crop edge. Set --frame-w / --frame-h to the storyboard
+     artboard size from the design file. If the product sits in a window
+     inside the frame, the window is content inset inside it, with room
+     around it for things to fly in and out and get cropped by the FRAME,
+     not the window. Below --frame-w the whole frame scales down as one
+     rigid unit (like a video) instead of reflowing: everything inside is
+     positioned and timed, so reflow would break layout AND animation sync.
+     JS sets --frame-scale. */
+  :root{
+    --frame-w:1440;   /* unitless: also used for aspect-ratio and in JS */
+    --frame-h:900;
+    --window-w:1040px;   /* placeholder: replace from the design file */
+    --window-h:600px;
+  }
+  .frame-wrap{
     width:100%;
-    max-width:1440px;
-    aspect-ratio:1440/900;
+    max-width:calc(var(--frame-w) * 1px);
+    aspect-ratio:var(--frame-w) / var(--frame-h);
     position:relative;
   }
-  .stage{
-    width:1440px;
-    height:900px;
+  .frame{
+    width:calc(var(--frame-w) * 1px);
+    height:calc(var(--frame-h) * 1px);
     position:absolute;
     top:0;
     left:0;
     background:var(--bg-frame);
     overflow:hidden;
-    transform:scale(var(--stage-scale, 1));
+    transform:scale(var(--frame-scale, 1));
     transform-origin:top left;
   }
 
-  /* ---------- app shell (the 1014x553 product window) ---------- */
-  .app-shell{
-    width:1014px;
-    height:553px;
+  /* ---------- product window (optional) ----------
+     Size from the design file via --window-w / --window-h. Centred in the
+     frame here; set left/top from the design file if it isn't. Delete the
+     window entirely if the product fills the frame. */
+  .window{
+    width:var(--window-w);
+    height:var(--window-h);
     position:absolute;
-    left:213px;
-    top:173.5px;
+    left:calc((var(--frame-w) * 1px - var(--window-w)) / 2);
+    top:calc((var(--frame-h) * 1px - var(--window-h)) / 2);
     background:var(--bg-shell);
     border-radius:12px;
     box-shadow:0 0 1px rgba(29,28,29,.2), 0 8px 12px rgba(29,28,29,.1);
-    /* overflow intentionally NOT hidden — the .stage above is the real crop
+    /* overflow intentionally NOT hidden — the .frame above is the real crop
        boundary. Hidden here would also clip hover scale-ups that need to
        render past the window's own edge. */
   }
@@ -106,7 +116,7 @@
   .dot.yellow{background:#FCBB40;}
   .dot.green{background:#34C648;}
 
-  .body-row{display:flex;align-items:stretch;height:513px;}
+  .body-row{display:flex;align-items:stretch;height:calc(var(--window-h) - 40px);} /* minus titlebar */
 
   /* ---------- sidebar ---------- */
   .sidebar{width:218px;flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;padding:4px;}
@@ -175,9 +185,9 @@
   .skel-line.w1{width:40%;}
   .skel-line.w2{width:70%;}
 
-  /* popup — absolutely positioned inside .app-shell. Use % of the 1014x553
-     window (measured from Figma) so it holds its relative place at any
-     stage scale. */
+  /* popup — absolutely positioned inside .window. Use % of the window
+     (measured from the design file) so it holds its relative place at any
+     frame scale. */
   .popup{position:absolute;opacity:0;width:34%;left:62%;top:22%;background:#fff;border-radius:14px;box-shadow:0 4px 27px rgba(0,0,0,.25);padding:16px;display:flex;flex-direction:column;gap:10px;z-index:5;}
   .popup b{font-weight:700;font-size:14px;color:#000;}
   .popup .skel-line{height:8px;}
@@ -201,9 +211,9 @@
 </head>
 <body data-scene="overview">
 
-<div class="stage-wrap">
-<div class="stage">
-<div class="app-shell">
+<div class="frame-wrap">
+<div class="frame">
+<div class="window">
   <div class="titlebar">
     <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
   </div>
@@ -286,7 +296,7 @@
     </main>
   </div><!-- /.body-row -->
 
-  <!-- popup lives on .app-shell (positioned), not inside a panel, so the
+  <!-- popup lives on .window (positioned), not inside a panel, so the
        panel's own fade doesn't drag it along and its % coords are window-
        relative -->
   <div class="popup" id="popup" data-skel="off">
@@ -295,37 +305,37 @@
     <div class="skel-line w1"></div>
   </div>
 
-  <!-- inside .app-shell on purpose: every cursor coordinate is window-
-       relative (1014x553), so the numbers never need the .stage frame
-       offset (213,173.5) applied to them. -->
+  <!-- inside .window on purpose: every cursor coordinate is window-
+       relative, so the numbers never need the window's offset inside the
+       frame applied to them. If there is no window, move it to .frame. -->
   <div class="cursor-overlay">
     <svg viewBox="0 0 26 41" fill="none">
         <path d="M21.6 35c.4 1 0 4.9-2.2 5.8-1.7.7-3.8.3-4.7.1-.3-.1-.5-.3-.6-.5l-4.4-8.8c-.3-.6-1.1-.7-1.6-.3l-6.3 6.3c-.6.6-1.7.2-1.7-.7V1c0-.9 1.1-1.3 1.7-.7l24.2 24.2c.6.6.2 1.7-.7 1.7h-6.2c-.8 0-1.3.8-.9 1.5 1.1 2.3 3.1 6.3 3.5 7.3Z" fill="#fff"/>
       <path d="M2.4 6.9c0-.9 1.1-1.3 1.7-.7l16 16c.6.6.2 1.7-.7 1.7h-4.4c-.8 0-1.3.8-.9 1.5l5.2 10.5c.4.8-.4 1.9-1.2 2.4-.5.4-1.4.2-2 .1a1 1 0 0 1-.6-.5L10.3 27.5c-.3-.6-1.1-.7-1.6-.2L4.1 31.8c-.6.6-1.7.2-1.7-.7V6.9Z" fill="#000"/>
     </svg>
   </div>
-</div><!-- /.app-shell -->
+</div><!-- /.window -->
 
-<!-- stage-level elements (things that fly in from OFF the window, e.g. a
-     dragged card) go here, NOT inside .app-shell: their x/y are then
-     .stage-relative frame coordinates (1440x900). -->
+<!-- frame-level elements (things that fly in from OFF the window) go here,
+     NOT inside .window: their x/y are then frame coordinates. -->
 
 </div>
 </div>
 
-<!-- pinned versions — same as the first shipped build -->
+<!-- pinned versions: keep them pinned, bump deliberately -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/CustomEase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/MotionPathPlugin.min.js"></script>
 <script>
-  // scale-to-fit: stage is authored at a fixed 1440x900 (the real video
-  // frame), scaled as one rigid unit below that width instead of
-  // reflowing (see .stage-wrap css)
+  // scale-to-fit: the frame is authored at a fixed --frame-w x --frame-h,
+  // scaled as one rigid unit below that width instead of reflowing (see
+  // .frame-wrap css)
   (function(){
-    var wrap = document.querySelector('.stage-wrap');
-    var stage = document.querySelector('.stage');
+    var wrap = document.querySelector('.frame-wrap');
+    var frame = document.querySelector('.frame');
+    var frameW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--frame-w'));
     function setScale(){
-      stage.style.setProperty('--stage-scale', wrap.clientWidth / 1440);
+      frame.style.setProperty('--frame-scale', wrap.clientWidth / frameW);
     }
     new ResizeObserver(setScale).observe(wrap);
     setScale();
@@ -357,30 +367,30 @@
   var $$ = function(sel, ctx){ return [].slice.call((ctx||document).querySelectorAll(sel)); };
 
   var body = document.body;
-  var appShell = $('.app-shell');
+  var win = $('.window');
   var cursor = $('.cursor-overlay');
 
   // -------------------------------------------------------------------
-  // targetOf(el, sceneKey) — window-relative (1014x553) centre of an
-  // element, for cursor targets. Measured at BUILD time with offsetLeft/
-  // offsetTop (layout boxes, so unaffected by GSAP transforms or the
-  // stage scale). Panels for later scenes are display:none at build time
-  // and would measure as 0,0 (that sent the first build's cursor off-frame) — so
-  // this temporarily flips body[data-scene] to the owning scene, measures,
-  // and flips it back. Pass dx/dy to nudge off-centre.
+  // targetOf(el, sceneKey) — window-relative centre of an element, for
+  // cursor targets. Measured at BUILD time with offsetLeft/offsetTop
+  // (layout boxes, so unaffected by GSAP transforms or the frame scale).
+  // Panels for later scenes are display:none at build time and would
+  // measure as 0,0, sending the cursor off-frame, so this temporarily
+  // flips body[data-scene] to the owning scene, measures, and flips it
+  // back. Pass dx/dy to nudge off-centre.
   // -------------------------------------------------------------------
   function targetOf(el, sceneKey, dx, dy){
     var prev = body.getAttribute('data-scene');
     if (sceneKey) body.setAttribute('data-scene', sceneKey);
     var x = 0, y = 0, n = el;
-    while (n && n !== appShell){ x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+    while (n && n !== win){ x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
     var out = { x: x + el.offsetWidth/2 + (dx||0), y: y + el.offsetHeight/2 + (dy||0) };
     body.setAttribute('data-scene', prev);
     return out;
   }
 
   // cursor rest / anchor points (window-relative)
-  var STAGE_CENTER = {x:507, y:276};
+  var WINDOW_CENTER = {x:win.offsetWidth/2, y:win.offsetHeight/2};
   var SIDEBAR_REST = {x:110, y:15};
   var NAV = {};
   $$('.nav-item').forEach(function(el){ NAV[el.getAttribute('data-nav')] = targetOf(el, null, -40, 0); });
@@ -395,7 +405,7 @@
 
   // build-time tracker of where the cursor will be, so each move only
   // needs a destination and scenes don't have to hand-carry `from` points
-  var cursorAt = {x:STAGE_CENTER.x, y:STAGE_CENTER.y};
+  var cursorAt = {x:WINDOW_CENTER.x, y:WINDOW_CENTER.y};
 
   // cursor travel with a subtle perpendicular arc at the midpoint (Disney
   // Arcs, corporate = subtle). ONE tween along a bezier through the offset
@@ -470,8 +480,8 @@
   }
 
   // clip-path mask reveal, left -> right. Starts from `startPct` hidden on
-  // the right (100 = fully hidden; the first build's chart used 80 so a stub of
-  // line was already there on entrance).
+  // the right (100 = fully hidden; use less, e.g. 80, if a stub of the
+  // line should already show on entrance).
   function maskReveal(tl, els, pos, dur, startPct){
     var hidden = 'inset(0% '+(startPct==null?100:startPct)+'% 0% 0%)';
     tl.fromTo(els, {clipPath:hidden}, {clipPath:'inset(0% 0% 0% 0%)', duration:dur||DUR.dramatic, ease:'std', immediateRender:false}, pos);
@@ -516,20 +526,20 @@
 
     // reset — everything this scene touches, back to pristine, every loop
     tl.set(body, {attr:{'data-scene':'overview'}}, 0)
-      .set(cursor, {x:STAGE_CENTER.x, y:STAGE_CENTER.y, scale:1, autoAlpha:0}, 0)
+      .set(cursor, {x:WINDOW_CENTER.x, y:WINDOW_CENTER.y, scale:1, autoAlpha:0}, 0)
       .set(allGlows, {autoAlpha:0}, 0)
       .set(cards, {autoAlpha:0, scale:0.92, zIndex:0, transformOrigin:'center center'}, 0)
       .set(sparklines, {clipPath:'inset(0% 100% 0% 0%)'}, 0)
       .set(chartMask, {clipPath:'inset(0% 80% 0% 0%)'}, 0);
     counters.forEach(function(el){ el.textContent = '0' + (el.getAttribute('data-suffix')||''); });
-    cursorAt = {x:STAGE_CENTER.x, y:STAGE_CENTER.y};
+    cursorAt = {x:WINDOW_CENTER.x, y:WINDOW_CENTER.y};
 
-    // cursor fades in at stage centre, arcs to the nav item, clicks
+    // cursor fades in at window centre, arcs to the nav item, clicks
     tl.to(cursor, {autoAlpha:1, duration:.2, ease:'std'}, 0);
     arcMove(tl, NAV.overview, .48, 'std', .2);
     navClick(tl, 'overview', .68);
 
-    // cards cascade in, 70ms stagger, hero leads
+    // cards cascade in, 70ms stagger, first card leads
     cards.forEach(function(el, i){
       tl.to(el, {autoAlpha:1, scale:1, duration:.28, ease:'emp'}, .85 + i*.07);
     });
@@ -538,13 +548,13 @@
     countUp(tl, counters[0], 1.0);
     counters.slice(1).forEach(function(el, i){ countUp(tl, el, 1.13 + i*.07, .7); });
 
-    // sparklines: three different starts, ONE landing beat (all end ~2.17)
+    // sparklines: three different starts, ONE shared landing beat
     sparklines.forEach(function(el, i){
       var start = 1.27 + i*.07;
       maskReveal(tl, el, start, 2.17 - start, 100);
     });
 
-    // hold on the nav, then hover the hero card: scale up (stays scaled),
+    // hold on the nav, then hover the first card: scale up (stays scaled),
     // chart line mask-reveals. zIndex so the scale renders over siblings.
     var chartTarget = targetOf(chartCard, 'overview', -60, -20);
     arcMove(tl, chartTarget, travelDur(chartTarget), 'std', 1.6);
@@ -612,7 +622,7 @@
   // Each scene gets a label at its start; sceneLabels maps nav key ->
   // label (the debug scrubber and the nav-click QA hook both read it).
   // ===================================================================
-  var PLAYBACK_RATE = 1;   // global speed lever — the first build shipped at .5 after feedback
+  var PLAYBACK_RATE = 1;   // global speed lever: tune overall speed here first, not per tween
   var master = gsap.timeline({repeat:-1, repeatDelay:.4});
   var sceneLabels = {};
 

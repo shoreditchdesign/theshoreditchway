@@ -5,9 +5,7 @@ description: "Build a product walkthrough or explainer animation as one self-con
 
 # Hoxton code animation
 
-Shoreditch Design's way of making explainer animations in code. Output is one HTML file: a fixed-size stage that scales like a video, a fake cursor clicking through a product UI, and one GSAP master timeline that loops. It replaces an mp4 that looked blurry on desktop.
-
-Built from a shipped product walkthrough (Aug 2026, 4 scenes, about 17s at 0.5x). "The first build" in these docs means that project.
+Shoreditch Design's way of making explainer animations in code. Output is one HTML file: a fixed-size frame that scales like a video, a fake cursor clicking through a product UI, and one GSAP master timeline that loops. It replaces an mp4: sharp at any resolution, scrubbable for review, and small enough to embed.
 
 ## Who you're working with
 
@@ -25,15 +23,15 @@ Assume the user has never run this process. They may be a designer or developer 
 
 | File | Role |
 |---|---|
-| `reference/process.md` | The whole process in detail, including Figma and Paper MCP calls and what came up in feedback on the first build. Read first. |
+| `reference/process.md` | The whole process in detail, including Figma and Paper MCP calls and the feedback that comes up on most builds. Read first. |
 | `reference/mcp-setup.md` | Checking, installing and signing in to the Figma or Paper MCP on the user's behalf. |
 | `reference/debug-panel-guide.md` | How to explain the debug panel and the feedback format to the user. |
 | `reference/gsap-vs-css.md` | What goes in GSAP, what stays in CSS, and why. |
-| `reference/build-patterns.md` | Stage scaling, timeline structure, helpers and known bug fixes. |
+| `reference/build-patterns.md` | Frame scaling, timeline structure, helpers, and rules that prevent the usual bugs. |
 | `reference/handoff.md` | Turning the dev build into the client file, the plain-text README, zipping. |
 | `templates/script.md` | Brief format, one section per storyboard frame. |
 | `templates/timeline.md` | Source-of-truth format: easing tokens, duration tiers, global rules, per-scene ms tables. |
-| `templates/starter.html` | Working starter: 1440×900 frame, window inset, cursor, two scenes, master timeline, helpers, debug panel. |
+| `templates/starter.html` | Working starter: fixed frame, optional product window, cursor, two placeholder scenes, master timeline, helpers, debug panel. Swap the placeholder content for the real design. |
 | `templates/debug-scrubber.js` | The debug panel as a standalone block. Already inside the starter. |
 
 If the environment can't read local skill files, fetch them from `https://theshoreditchway.vercel.app/skills/hoxton-codeanimation/<path>`. Live starter: `https://theshoreditchway.vercel.app/skills/hoxton-codeanimation/templates/starter.html?debug=1`. Showing the user this link early is the fastest way to explain what they'll get.
@@ -103,7 +101,7 @@ Explain what the client gets and why the debug panel comes out. Follow `referenc
 
 - **It's a video, not a slideshow.** Continuous motion, single curved paths, no dead stops between beats.
 - **Measure, don't eyeball.** Sizes, positions, scale ratios and rotations come from the design file. Numbers in script.md are guesses to check.
-- **Fixed stage, scaled as one unit.** Never let text reflow. `overflow:hidden` only on the frame, never on wrappers that host hover scales.
+- **Fixed frame, scaled as one unit.** Never let text reflow. `overflow:hidden` only on the frame, never on wrappers that host hover scales.
 - **GSAP owns time, CSS owns state and ambient loops.** Anything that must land on a `?t=` frame is a tween. No `setTimeout`, no CSS transitions on GSAP-driven elements.
 - **Cursor:** one MotionPath tween per move with a 10–15px arc, distance-scaled duration, click bounce on every click. It goes straight to the next nav item; it only returns to rest at the loop seam.
 - **Panels swap on cursor arrival or click**, not at the scene label.

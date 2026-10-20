@@ -5,10 +5,10 @@ The dev build is `index.html` (with the scrubber). The deliverable is `output.ht
 ## Checklist
 
 1. **Delete the debug scrubber.** It lives in its own `<script>` block near the end, fenced by the comment `DEV-ONLY — delete this whole <script> block before handing the embed to the client`. It only reads `master` and `sceneLabels`, so it comes out as one cut. Remove the `.debug-*` CSS too if it's in the main `<style>`.
-2. **Order the file for pasting:** `<style>` first, then markup, then the GSAP `<script src>` tags (core, CustomEase, MotionPathPlugin, in that order), then the inline scripts. No `<html>`, `<head>` or `<body>` wrapper; the CMS block supplies the page. (The first build kept the full document and dev page styles, so its README described a file it didn't match. Strip them.)
+2. **Order the file for pasting:** `<style>` first, then markup, then the GSAP `<script src>` tags (core, CustomEase, MotionPathPlugin, in that order), then the inline scripts. No `<html>`, `<head>` or `<body>` wrapper, and no dev page styles; the CMS block supplies the page. The README must describe the file exactly as sent.
 3. **External dependencies.** GSAP and Google Fonts load from CDNs. Ask the client whether that's allowed, whether the fonts already load on the page, or whether to self-host.
-4. **Mobile.** The stage scales down as one rigid unit, like a video. Text becomes unreadable well before phone width. Agree a breakpoint swap on the site side (this embed for desktop/tablet, the mp4 below it). Build the swap in the CMS, not in this file.
-5. **Loop.** Play it end to end at least twice and check the seam where scene 4 hands back to scene 1. Nothing should flash.
+4. **Mobile.** The frame scales down as one rigid unit, like a video. Text becomes unreadable well before phone width. Agree a breakpoint swap on the site side (this embed for desktop/tablet, the mp4 below it). Build the swap in the CMS, not in this file.
+5. **Loop.** Play it end to end at least twice and check the seam where the last scene hands back to the first. Nothing should flash.
 6. **Console.** Zero errors with `?debug` off.
 7. **Playback rate.** `PLAYBACK_RATE` stays in the main script; the client gets the speed you reviewed at. Dev-only conveniences that live in the main script (e.g. nav-click-to-seek) can stay; they're harmless.
 8. **Zip and version.** `<Client> - Video Explainer vN.zip` with `output.html` + `README.txt`. Bump N on each send. Zip from the CLI so no `__MACOSX` entries go in:

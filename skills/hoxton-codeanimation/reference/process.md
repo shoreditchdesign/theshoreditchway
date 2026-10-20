@@ -1,25 +1,25 @@
 # Process
 
-How the first build went from storyboard to WordPress embed, written as steps to repeat. Each stage ends with something the user signs off before the next one starts.
+How a code animation goes from storyboard to CMS embed. Each stage ends with something the user signs off before the next one starts.
 
 ## 1. Inputs
 
-- **Design source: Figma or Paper.** Ask which one the storyboard lives in. Either works; the first build used Paper. The file should be built as editable layers: every component, tab and panel as its own frame, with stable layer names across artboards. This is what you scaffold the HTML from and measure against. If there is no design file at all (only screenshots or a live product), say that the build will be eyeballed from images and positions will need more feedback rounds.
+- **Design source: Figma or Paper.** Ask which one the storyboard lives in. Either works. The file should be built as editable layers: every component, tab and panel as its own frame, with stable layer names across artboards. This is what you scaffold the HTML from and measure against. If there is no design file at all (only screenshots or a live product), say that the build will be eyeballed from images and positions will need more feedback rounds.
 - **Frames.** Storyboard stills exported from the artboards (Figma: select frames, export PNG at 2x; Paper: export), named `frames/Scene N.M.png` (scene, then beat). They show start and end states, not motion. Read every frame before anything else so you understand the product. If the user hasn't exported them, offer to pull them through the MCP (`get_screenshot` in either tool).
 - **script.md.** Written by the user, not by you (format: `templates/script.md`). Prose per beat. Beat numbers are frame order and say nothing about timing. Numbers like "about 1.5x" or "around 30 degrees" are guesses meant to be checked against the design file.
 
 ## 2. Check the brief against the frames (no code)
 
-Read script.md and every frame. Reply with numbered questions: anything ambiguous, any beat that doesn't match a frame, any element you can't find, any guessed number the design file contradicts. Don't write HTML or animation yet. Typical questions from the first build:
+Read script.md and every frame. Reply with numbered questions: anything ambiguous, any beat that doesn't match a frame, any element you can't find, any guessed number the design file contradicts. Don't write HTML or animation yet. Questions that come up on most builds:
 
 - Which hover triggers which reveal, and what runs on its own clock?
-- Which layer is the off-canvas element (drag chip, flying card)? Trace the same layer name across frames to see where it enters.
-- What is the real scale and rotation (measure: 481px dragged card ÷ 242px grid card ≈ 2.0x; authored tilt -14.4deg, so -15)?
-- **What is the video frame?** Is it the app window or the full artboard around it? The first build got this wrong: the white 1440×900 artboard was the frame, the 1014×553 window sat inside it at 213, 173.5. Crop happens at the frame. Ask this up front.
+- Which layer is an off-canvas element (something that flies in)? Trace the same layer name across frames to see where it enters.
+- What are the real scale and rotation? Measure them in the design file (target width ÷ source width; the authored rotation) rather than trusting the script's rough numbers.
+- **What is the video frame?** The full artboard, or the product window inside it? Crop happens at the frame, so this decides what can fly in from outside. Getting it wrong means rebuilding the layout. Ask up front.
 
 ## 3. timeline.md (no code)
 
-Load the `motion-design` skill (and `css-animation` if available). Turn script.md into `timeline.md` using `templates/timeline.md`: easing tokens, duration tiers, global rules, cursor anchors, then one ms table per scene. Use real reflow math (first build: card height 99 + 24 = 123px column push), not "nudge a bit". Mark every interpretive call 🟡 and get answers before building. This file is the source of truth; the code is its execution.
+Load the `motion-design` skill (and `css-animation` if available). Turn script.md into `timeline.md` using `templates/timeline.md`: easing tokens, duration tiers, global rules, cursor anchors, then one ms table per scene. Use real reflow math (an element's height plus the gap is how far the column moves), not "nudge a bit". Mark every interpretive call 🟡 and get answers before building. This file is the source of truth; the code is its execution.
 
 ## 4. Scaffold the static HTML from the design file
 
@@ -53,11 +53,11 @@ Read pattern per artboard or component:
 
 Rules:
 
-- Build one fixed-size `.stage` at the frame size, layout absolute or flex inside it, then scale the whole stage (see `build-patterns.md`). Never let text reflow.
-- `overflow: hidden` on the stage only (the video frame). Not on inner wrappers that host hover scales, or they clip.
+- Build one fixed-size `.frame` at the artboard size, layout absolute or flex inside it, then scale the whole frame (see `build-patterns.md`). Never let text reflow.
+- `overflow: hidden` on the frame only. Not on inner wrappers that host hover scales, or they clip.
 - Overlay positions (popups, modals) as **percentages of their container**, from `get_node_info`, not eyeballed.
 - Gradient "angular" strokes: a separate overlay layer with a double background (`linear-gradient(#fff) padding-box, <gradient> border-box`), so GSAP can crossfade its opacity.
-- Off-canvas elements live at stage level in stage coordinates.
+- Off-canvas elements live at frame level, in frame coordinates.
 - Every panel's markup exists up front; scenes show and hide them.
 
 Check the static build against the frames side by side before animating.
@@ -66,7 +66,7 @@ Check the static build against the frames side by side before animating.
 
 Start from `templates/starter.html`. One master GSAP timeline, one function per scene, rows from timeline.md placed at `'sceneN+=<ms/1000>'`. Easing tokens become `CustomEase` with the same beziers. See `gsap-vs-css.md` for what goes where.
 
-Expect it to feel too fast. The first build shipped at `PLAYBACK_RATE = 0.5` on `master.timeScale()`. Keep the rate as one constant.
+Expect it to feel too fast. Slow it down with `PLAYBACK_RATE` on `master.timeScale()` before touching individual durations. Keep the rate as one constant.
 
 ## 6. Debug scrubber, then feedback by timestamp
 
@@ -78,7 +78,7 @@ index.html?debug=1&t=4.215&speed=0.5 - popup 2 should sit under popup 1, left-al
 
 For each line: open the URL over HTTP (`python3 -m http.server 8000`; `file://` is blocked by the browser extension), confirm you see the problem on that frame, fix it, reload the same URL and check again. Screenshot when the fix is visual. Answer each line in order.
 
-What came up in feedback on the first build, so get it right first time:
+Feedback that comes up on most builds, so get it right first time:
 
 - It should feel like one continuous video, not slides with smart animate. Single curved paths, no dead stops, no detours.
 - The cursor goes straight to the next nav item. It does not return to a rest point between scenes, whatever the script's literal wording says.
@@ -86,9 +86,9 @@ What came up in feedback on the first build, so get it right first time:
 - Move objects with combined transforms (position, scale, rotation at once).
 - Exits faster than entrances; popups fly toward the frame edges, opacity faster than translate.
 - Grids stagger in by row or column batches, never 16 cards one by one.
-- Count-ups start near the final value (740 → 810, not 0 → 801) and get a fixed `min-width` so the layout doesn't shift.
+- Count-ups start near the final value (e.g. 90% of it, not 0) and get a fixed `min-width` so the layout doesn't shift.
 - Don't measure `display:none` elements at runtime (returns 0,0). Hardcode measured coordinates or measure when visible.
-- When the user pastes an SVG to swap in, change only what they asked (e.g. the gradient fill). Keep stroke geometry and widths.
+- When the user pastes an SVG to swap in, change only what they asked for. Keep the rest of the geometry as it was.
 - When a single sequence keeps failing, give it its own subagent with just that sequence and its measurements.
 
 After each round, update timeline.md to match the code.

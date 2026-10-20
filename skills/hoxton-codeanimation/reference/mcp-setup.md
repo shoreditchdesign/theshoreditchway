@@ -38,7 +38,7 @@ Paper's MCP server runs inside the Paper desktop app, on the user's machine. No 
 claude mcp add --transport http --scope user paper http://127.0.0.1:29979/mcp
 ```
 
-`29979` is the port Paper used on our machines. If it doesn't connect, ask the user to check the MCP address in Paper's settings and re-add with that one (`claude mcp remove paper` first).
+`29979` is Paper's default port. If it doesn't connect, ask the user to check the MCP address in Paper's settings and re-add with that one (`claude mcp remove paper` first).
 
 **Check:** call `get_tree_summary` on the artboard the user linked. If it fails, ask the user to confirm Paper is open, then `/mcp` to reconnect.
 

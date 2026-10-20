@@ -8,12 +8,12 @@ The reason is the scrubber. The whole review loop depends on `master.time(t)` la
 
 ## Use GSAP for
 
-| Thing | How (first build) |
+| Thing | How |
 |---|---|
 | Scene order and timing | One `master = gsap.timeline({repeat:-1})`. One function per scene returns a sub-timeline, added at a label. `sceneLabels` feeds the scrubber's jump buttons. |
 | Easing tokens | `CustomEase.create('std', 'M0,0 C0.2,0 0,1 1,1')` etc. Same beziers as the CSS vars, so the doc, CSS and JS share one vocabulary. |
 | Cursor travel | `MotionPathPlugin` through start, offset midpoint, end with `curviness:1.25`. Gives the 10–15px arc. A straight `x/y` tween looks mechanical. |
-| Curved flights with rotation and scale | Same motionPath, with `rotation` and `scale` tweened alongside on their own easings (scene 4 card: rotation settles ~100ms before position). |
+| Curved flights with rotation and scale | Same motionPath, with `rotation` and `scale` tweened alongside on their own easings; rotation can settle ~100ms before position. |
 | Click bounce | Three chained `scale` tweens (press, overshoot, settle). Reused helper. |
 | Stagger entrances | `stagger` on fade-and-rise tweens. |
 | Mask reveals | Tween `clipPath` from `inset(0 100% 0 0)` to `inset(0 0 0 0)`. |
@@ -31,10 +31,10 @@ The reason is the scrubber. The whole review loop depends on `master.time(t)` la
 |---|---|
 | Layout, tokens, the static design | Everything that is true at rest. Built from the design file, not animated. |
 | Easing tokens as `--ease-*` vars | So any CSS transition uses the same curves as the timeline. |
-| Skeleton pulse | `@keyframes skeleton-pulse` on `.skel-pulsing`, 1600ms, infinite. It is ambient, never synced to a beat, and should keep breathing while paused on a frame. GSAP adds the class when the bar lands. |
+| Skeleton pulse | `@keyframes skeleton-pulse` under `[data-skel="on"]`, 1600ms, infinite. It is ambient, never synced to a beat, and should keep breathing while paused on a frame. GSAP sets the attribute when the bars land. |
 | Initial hidden states | Set opacity 0 / offsets in CSS or with `gsap.set` before the timeline is built, so there's no flash of unstyled frame on load. |
 | Crossfadable states (gradient active stroke) | Draw the state on its own overlay layer in CSS; GSAP tweens that layer's opacity. A class swap would be instant. |
-| Scale-to-fit stage | A fixed design-size stage scaled with `transform: scale()` from a small resize handler. The animation itself only ever deals in stage pixels. |
+| Scale-to-fit frame | A fixed design-size frame scaled with `transform: scale()` from a small resize handler. The animation itself only ever deals in frame pixels. |
 
 ## Don't
 
@@ -43,10 +43,10 @@ The reason is the scrubber. The whole review loop depends on `master.time(t)` la
 - Don't use `setTimeout` / `setInterval` for beats. They can't be scrubbed. Use timeline positions.
 - Don't use linear easing for movement. Linear only for true ambient loops.
 - Don't use CSS `animation` for one-shot entrances. They replay on class re-add and ignore scrubbing.
-- Don't add a plugin for one effect you can tween by hand. The first build needed only core, CustomEase and MotionPathPlugin.
+- Don't add a plugin for one effect you can tween by hand. Core, CustomEase and MotionPathPlugin cover most walkthroughs.
 
 ## Dependencies
 
-Pin exact versions on jsDelivr, loaded in this order: core, CustomEase, MotionPathPlugin, then the inline scripts. The first build used `gsap@3.12.7`. GSAP and all its plugins are free to use, including on commercial sites.
+Pin exact versions on jsDelivr (the starter pins one), loaded in this order: core, CustomEase, MotionPathPlugin, then the inline scripts. GSAP and all its plugins are free to use, including on commercial sites.
 
 The client may want these self-hosted. Ask before handoff (see `handoff.md`).
