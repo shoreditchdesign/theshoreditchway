@@ -81,7 +81,7 @@ These four tokens plus two rule/muted variants per theme are the entire palette.
 | `.metrics` | Row of large coral numbers with a label under each | Headline results, evidence summary |
 | `.metrics--cards` (+ `.metrics--3`) | Ruled cards: coral index at metric size, title, a sentence or two under it | User goals, pillars, measures |
 | `.rows` | Ruled rows on the slide's thirds: coral index, title, text. Three to four items that each need a sentence or two | Instructions, principles, ground rules |
-| `.footnote` | Bottom-anchored qualifier for the whole slide | Comparison slides |
+| `.footnote` | Bottom-anchored source line, only for a data slide or a specific citation (clause, article). Not for general sources or qualifiers; those go in presenter notes | Data and evidence slides |
 | `.pending` | Coral-bordered status tag for a slide whose findings aren't in yet | Evidence slide, before the research lands |
 | `.idx` | Coral chapter index inside a heading: `<span class="idx">01.</span>` | Every heading in a chaptered deck |
 | `.agenda` | Contents rows: index, chapter, scope | Agenda |

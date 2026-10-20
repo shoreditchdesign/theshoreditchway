@@ -40,7 +40,7 @@ If the environment can't read local skill files, fetch them from `https://thesho
 | `divider` | Chapter opener. Big coral index over the chapter name. Dark. |
 | `statement` | One key message at heading size. Use once per chapter at most. |
 | `stack` | Numbered sequential points, title over body. |
-| `compare` | Two-column A vs B with in-favour/against marks. Optional `.footnote`. |
+| `compare` | Two-column A vs B with in-favour/against marks. `.footnote` only for a data source or citation (see Hard rules). |
 | `matrix` | 2×2 positioning chart: plotted competitors, client point in coral, notes on the right. Place points with `--x` / `--y`. |
 | `case` | Case study: challenge, approach, outcome in three columns. |
 | `timeline` | Phases left to right with dates and deliverables. 4 by default, `.timeline--3` / `.timeline--5`. |
@@ -107,5 +107,6 @@ The 20% that stays flexible: client and product names, technical terms the clien
 - Only sizes from the type scale and spacing from `--space-*`. No new fonts, colours or sizes.
 - Every claim traces to a source the user gave you. No invented numbers, names, quotes or clients. Use `<span class="pending">Findings pending</span>` where evidence is missing.
 - No em dashes in body copy.
+- No footnotes or captions by default. Add a `.footnote` only when the slide shows data (numbers, charts, metrics) and needs its source, or when it cites a specific clause or article (e.g. "RFP §2.3"). Never use one for a general source line, a recap or a qualifier; put that in the presenter notes instead.
 - Frame: 64px padding on every side, logo at the same 64px inset top right and the footer on the bottom 64px line. The cover's title block sits on the bottom 64px line; divider titles centre vertically; the contact title centres with its details at the bottom. deck.js adds the footer (page number left, chapter from `data-section` centre, "Shoreditch Design Studio" right, 12px uppercase Cabinet Grotesk) to every slide; `data-footer="off"` skips one, and the cover skips it by default. Don't override these per deck.
 - Don't convert to PPTX, PDF or a framework app unless asked.
