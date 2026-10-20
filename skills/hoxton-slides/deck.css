@@ -623,7 +623,7 @@ table.grid tr.total td{color:var(--ink);font-weight:700}
 .roadmap-panel .body-text{font-size:15.5px;line-height:1.55}
 
 /* rows with five items: tighter padding so the set fits the slide */
-.rows--5 .row{padding-block:var(--space-3)}
+.rows--5 .row{padding-block:var(--space-2)}
 
 /* ---------- gantt — workstreams against a week (or month) scale ----------
    Set the scale with style="--cols:10" on .gantt. Each bar takes
