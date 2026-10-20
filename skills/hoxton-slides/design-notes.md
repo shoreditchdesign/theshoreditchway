@@ -59,7 +59,7 @@ These four tokens plus two rule/muted variants per theme are the entire palette.
 
 ## 5. Logo
 
-`logo.js` holds the mark as an SVG string in the `LOGO` constant, defaulting to the Shoreditch Design mark. For a client deck, replace it in the deck's copy of `logo.js` with the client's SVG, every `fill`/`stroke` set to `currentColor`. That's what makes it flip automatically between light and dark slides without a second asset. If Figma paste fidelity is poor with an inlined SVG, fall back to two static SVGs (one per colourway) and swap based on slide theme, ask before doing this since it changes the injection mechanism.
+`logo.js` injects the mark as a flattened PNG: `logo-dark.png` (black) on light slides, `logo-light.png` (white) on dark slides and over a roadmap slide's dark panel. It resolves both files next to `logo.js` itself, so it works whether the deck loads it locally or from the live site. PNGs replace the old inline SVG because the Figma Chrome extension adds a stroke to the vector on paste, which defaces the mark. For a client deck, replace the two PNGs with the client's mark at the same 505×165 ratio.
 
 ## 6. Layout
 

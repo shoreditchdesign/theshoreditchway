@@ -62,8 +62,7 @@ body{
   height:33px;
   color:inherit;
 }
-.logo svg{width:100%;height:100%;display:block}
-.logo svg path{fill:currentColor;stroke:currentColor}
+.logo img{width:100%;height:100%;object-fit:contain;display:block}
 
 /* ---------- type ---------- */
 h1{

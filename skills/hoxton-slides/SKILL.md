@@ -15,17 +15,24 @@ Live preview of every layout: https://theshoreditchway.vercel.app/skills/hoxton-
 |---|---|
 | `index.html` | Layout library. One example slide per layout, each tagged `data-layout="<name>"`. Read it for markup. |
 | `deck.css` | Tokens, type scale, spacing scale, every layout's CSS. Copy unchanged. |
-| `logo.js` | Injects the logo into `[data-logo]`. Shoreditch mark by default. Swap the `LOGO` SVG for a client deck. |
+| `logo.js` | Injects the logo into `[data-logo]` as a PNG: `logo-dark.png` on light slides, `logo-light.png` on dark slides. Swap the two PNGs for a client deck. |
+| `logo-dark.png` / `logo-light.png` | Shoreditch mark, black and white, 505×165. |
 | `deck.js` | Navigation engine: bottom bar, index panel, hover thumbnails, presenter notes drawer (N or the right-edge chevron), slide footer, `?slide=N`, arrow keys, fullscreen, print. Copy unchanged. |
 | `design-notes.md` | Rules: themes, type, layout, components, content register. Read before writing. |
-| `logo.svg` | Shoreditch mark as a standalone file. |
+| `logo.svg` | Shoreditch mark as a vector, for reference. Decks use the PNGs. |
 
 ## Workflow
 
 1. Read `design-notes.md` and `index.html` from this skill folder.
 2. Outline the deck as a list of slides, each mapped to a layout below. Confirm the outline with the user before writing slides.
-3. Create a folder for the deck. Copy `deck.css`, `logo.js` and `deck.js` into it unchanged.
-4. Write `index.html` in that folder: same `<head>` as the library (font links + `deck.css`), then one `<section>` per slide copied from the matching library layout, then `<script src="logo.js"></script>` and `<script src="deck.js"></script>` at the end of `<body>`.
+3. Create a folder for the deck. Don't copy `deck.css`, `logo.js` or `deck.js` into it: link the live copies from `https://theshoreditchway.vercel.app/skills/hoxton-slides/`, so every deck picks up library fixes on reload. Copy them locally only for an offline or single-file handoff.
+4. Write `index.html` in that folder: same `<head>` as the library (font links + the live `deck.css`), then one `<section>` per slide copied from the matching library layout, then the live `logo.js` and `deck.js` scripts at the end of `<body>`:
+
+   ```html
+   <link rel="stylesheet" href="https://theshoreditchway.vercel.app/skills/hoxton-slides/deck.css">
+   <script src="https://theshoreditchway.vercel.app/skills/hoxton-slides/logo.js"></script>
+   <script src="https://theshoreditchway.vercel.app/skills/hoxton-slides/deck.js"></script>
+   ```
 5. Every slide keeps `<div class="logo" data-logo></div>`, a `data-section` label (it also feeds the footer's chapter name), and a `data-title` if it has no `h1`/`h2`. Presenter notes go in an `<aside class="notes">` inside the slide; deck.js shows them in the right-hand notes drawer (N or the right-edge chevron).
 6. Open the file in a browser and step through every slide to check nothing overflows the 1440×800 frame.
 
